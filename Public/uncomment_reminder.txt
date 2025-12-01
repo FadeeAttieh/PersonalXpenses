@@ -1,0 +1,397 @@
+uncomment line 786 //checkMonthClose() in index.html
+uncomment line 945 //showCloseMonthModal(balances); in index.html
+uncomment line 19 //router.get('/needs-close', balanceController.isPreviousMonthNeedsClosing); balances.js routes
+
+
+line 68 to 79 index.html
+<!-- Add the modal here -->
+<div id="closeMonthModal" class="modal" style="display:none;">
+  <div class="modal-content" style="max-width:500px;">
+    <h3>Close Month</h3>
+    <div id="closeMonthSummary"></div>
+    <form id="closeMonthForm">
+      <div id="closeMonthCurrencies" style="max-height:320px; overflow-y:auto; padding-right:8px;"></div>
+      <button type="submit" class="button" style="margin-top:1em;">Confirm & Start New Month</button>
+    </form>
+    <div id="closeMonthError" style="color:red;margin-top:0.5em;"></div>
+  </div>
+</div>
+
+
+line 1223 index.html the below code has been removed for duplication
+    async function fetchIncome() {
+      try {
+        const res = await authFetch('/entries?category=income', { credentials: 'include' }); // Updated function name
+        if (res.status === 401) {
+          forceLogoutOnError();
+          return;
+        }
+        const data = await res.json();
+        // Group by currency
+        const groups = {};
+        data.forEach(i => {
+          if (!groups[i.currency]) groups[i.currency] = [];
+          groups[i.currency].push(i);
+        });
+
+        if (!window.incomeGroupState) window.incomeGroupState = {};
+        let html = `<div class="income-groups" style="margin-top:1em;">`;
+        Object.keys(groups).forEach(currency => {
+          const expanded = !!window.incomeGroupState[currency];
+          let totalIncome = groups[currency].reduce((sum, i) => sum + i.amount, 0);
+          html += `
+            <div class="income-group" style="margin-bottom:1em;">
+              <div class="income-group-header"
+                style="cursor:pointer;display:flex;align-items:center;gap:0.7em;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#43e97b 0%,#38f9d7 100%);color:#222;padding:0.9em 1.3em;border-radius:14px;box-shadow:0 2px 8px rgba(67,233,123,0.10);"
+                onclick="expandIncomeGroup('${currency}')">
+                <span style="font-size:2em;">💵</span>
+                <span style="font-size:1.2em;">${currency}</span>
+                <span style="margin-left:auto;display:flex;align-items:center;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" style="transition:transform 0.4s cubic-bezier(.4,0,.2,1);transform:${expanded ? 'rotate(90deg)' : 'rotate(0deg)'}">
+                    <defs>
+                      <linearGradient id="arrowGradientIncome" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#43e97b"/>
+                        <stop offset="100%" stop-color="#38f9d7"/>
+                      </linearGradient>
+                    </defs>
+                    <polyline points="6 9 12 15 18 9" fill="none" stroke="url(#arrowGradientIncome)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="income-group-body${expanded ? ' expanded' : ''}" style="overflow:hidden;${expanded ? '' : 'max-height:0;'}">
+                <div class="income-group-inner">
+                  <table class="${getCurrentTableTheme()}" style="margin-top:0.5em;">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Note</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${groups[currency].map(i => `
+                        <tr class="income-row">
+                          <td>${i.date ? new Date(i.date).toLocaleDateString() : ''}</td>
+                          <td>${i.Type ? i.Type.name : ''}</td>
+                          <td>${i.note || ''}</td>
+                          <td>${i.amount}</td>
+                          <td><button class="button danger" onclick="deleteIncome(${i.id})">Delete</button></td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="3" style="text-align:right;font-weight:bold;">Total Income:</td>
+                        <td style="font-weight:bold;">${totalIncome.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += `
+        <style>
+          .income-group-body {
+            transition: max-height 0.6s cubic-bezier(.4,0,.2,1), box-shadow 0.3s, opacity 0.3s;
+            background: linear-gradient(90deg,#e0f7fa 0%,#b2ebf2 100%);
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 8px 24px rgba(67,233,123,0.10);
+            margin-top: 0.1em;
+            max-height: 0;
+            opacity: 0.7;
+          }
+          .income-group-body.expanded {
+            max-height: 600px;
+            opacity: 1;
+            box-shadow: 0 12px 32px rgba(67,233,123,0.18);
+          }
+          .income-group-inner {
+            padding: 1em 1em 0.5em 1em;
+            animation: fadeInSlide 0.6s;
+          }
+          @keyframes fadeInSlide {
+            from { opacity:0; transform:translateY(-20px);}
+            to { opacity:1; transform:translateY(0);}
+          }
+        </style>
+        `;
+        document.getElementById('incomeGrid').innerHTML = html;
+      } catch (err) {
+        forceLogoutOnError();
+      }
+    }
+line 1370 below was removed for duplicatio0n
+
+async function fetchExpenses() {
+      try {
+        const res = await authFetch('/entries?category=expense', { credentials: 'include' });
+        if (res.status === 401) {
+          forceLogoutOnError();
+          return;
+        }
+        const data = await res.json();
+        // Group by currency
+        const groups = {};
+        data.forEach(i => {
+          if (!groups[i.currency]) groups[i.currency] = [];
+          groups[i.currency].push(i);
+        });
+
+        if (!window.expenseGroupState) window.expenseGroupState = {};
+        let html = `<div class="expense-groups" style="margin-top:1em;">`;
+        Object.keys(groups).forEach(currency => {
+          const expanded = !!window.expenseGroupState[currency];
+          let totalExpenses = groups[currency].reduce((sum, i) => sum + i.amount, 0);
+          html += `
+            <div class="expense-group" style="margin-bottom:1em;">
+              <div class="expense-group-header"
+                style="cursor:pointer;display:flex;align-items:center;gap:0.7em;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#ff5858 0%,#f09819 100%);color:#222;padding:0.9em 1.3em;border-radius:14px;box-shadow:0 2px 8px rgba(255,88,88,0.10);"
+                onclick="expandExpenseGroup('${currency}')">
+                <span style="font-size:2em;">💸</span>
+                <span style="font-size:1.2em;">${currency}</span>
+                <span style="margin-left:auto;display:flex;align-items:center;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" style="transition:transform 0.4s cubic-bezier(.4,0,.2,1);transform:${expanded ? 'rotate(90deg)' : 'rotate(0deg)'}">
+                    <defs>
+                      <linearGradient id="arrowGradientExpense" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#ff5858"/>
+                        <stop offset="100%" stop-color="#f09819"/>
+                      </linearGradient>
+                    </defs>
+                    <polyline points="6 9 12 15 18 9" fill="none" stroke="url(#arrowGradientExpense)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="expense-group-body${expanded ? ' expanded' : ''}" style="overflow:hidden;${expanded ? '' : 'max-height:0;'}">
+                <div class="expense-group-inner">
+                  <table class="${getCurrentTableTheme()}" style="margin-top:0.5em;">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Note</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${groups[currency].map(i => `
+                        <tr class="expense-row">
+                          <td>${i.date ? new Date(i.date).toLocaleDateString() : ''}</td>
+                          <td>${i.Type ? i.Type.name : ''}</td>
+                          <td>${i.note || ''}</td>
+                          <td>${i.amount}</td>
+                          <td><button class="button danger" onclick="deleteExpense(${i.id})">Delete</button></td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="3" style="text-align:right;font-weight:bold;">Total Expenses:</td>
+                        <td style="font-weight:bold;">${totalExpenses.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += `
+        <style>
+          .expense-group-body {
+            transition: max-height 0.6s cubic-bezier(.4,0,.2,1), box-shadow 0.3s, opacity 0.3s;
+            background: linear-gradient(90deg,#fff3e0 0%,#ffe0b2 100%);
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 8px 24px rgba(255,88,88,0.10);
+            margin-top: 0.1em;
+            max-height: 0;
+            opacity: 0.7;
+          }
+          .expense-group-body.expanded {
+            max-height: 600px;
+            opacity: 1;
+            box-shadow: 0 12px 32px rgba(255,88,88,0.18);
+          }
+          .expense-group-inner {
+            padding: 1em 1em 0.5em 1em;
+            animation: fadeInSlide 0.6s;
+          }
+          @keyframes fadeInSlide {
+            from { opacity:0; transform:translateY(-20px);}
+            to { opacity:1; transform:translateY(0);}
+          }
+        </style>
+        `;
+        document.getElementById('expenseGrid').innerHTML = html;
+      } catch (err) {
+        forceLogoutOnError();
+      }
+    }
+
+    line 1539 duplicate
+
+    // Fetch types from backend and render grid
+async function fetchTypes() {
+  if (typeIsLoading) return;
+  typeIsLoading = true;
+  try {
+    const res = await authFetch('/types', { credentials: 'include' });
+    if (res.status ===  401) { forceLogoutOnError(); return; }
+    typeData = await res.json();
+    renderTypeGrid();
+  } catch (err) {
+    alert('Failed to fetch types: ' + err.message);
+  } finally {
+    typeIsLoading = false;
+  }
+}
+
+line 1652 duplicate
+ async function fetchTransfers() {
+      try {
+        const res = await authFetch('/transfers', { credentials: 'include' });
+        if (res.status === 401) {
+          forceLogoutOnError();
+          return;
+        }
+        const data = await res.json();
+        // Group by type (from_account + to_account)
+        const groups = {};
+        data.forEach(tr => {
+          const groupKey = `${tr.from_account} ➔ ${tr.to_account}`;
+          if (!groups[groupKey]) groups[groupKey] = [];
+          groups[groupKey].push(tr);
+        });
+
+        // State for expanded group
+        if (!window.transferGroupState) window.transferGroupState = {};
+        let html = `<div class="transfer-groups" style="margin-top:1em;">`;
+        Object.keys(groups).forEach((group, idx) => {
+          const expanded = !!window.transferGroupState[group];
+          html += `
+            <div class="transfer-group" style="margin-bottom:1em;">
+              <div
+                class="transfer-group-header"
+                style="cursor:pointer;display:flex;align-items:center;gap:0.7em;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#43e97b 0%,#38f9d7 100%);color:#222;padding:0.9em 1.3em;border-radius:14px;box-shadow:0 2px 8px rgba(67,233,123,0.10);transition:background 0.2s;"
+                onclick="expandTransferGroup('${group.replace(/'/g, "\\'")}')"
+              >
+                <span style="font-size:2em;filter:drop-shadow(0 2px 4px #38f9d7);">💎</span>
+                <span style="font-size:1.2em;letter-spacing:1px;">${group}</span>
+                <span style="margin-left:auto;display:flex;align-items:center;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" style="transition:transform 0.4s cubic-bezier(.4,0,.2,1);transform:${expanded ? 'rotate(90deg)' : 'rotate(0deg)'}">
+                    <defs>
+                      <linearGradient id="arrowGradient" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#43e97b"/>
+                        <stop offset="100%" stop-color="#38f9d7"/>
+                      </linearGradient>
+                    </defs>
+                    <polyline points="6 9 12 15 18 9" fill="none" stroke="url(#arrowGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="transfer-group-body${expanded ? ' expanded' : ''}" style="overflow:hidden;${expanded ? '' : 'max-height:0;'}">
+                <div class="transfer-group-inner">
+                  <table class="${getCurrentTableTheme()}" style="margin-top:0.5em;">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Currency</th>
+                        <th>Note</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${groups[group].map(tr => `
+                        <tr>
+                          <td>${tr.date ? new Date(tr.date).toLocaleDateString() : ''}</td>
+                          <td>${tr.amount}</td>
+                          <td>${tr.currency}</td>
+                          <td>${tr.note || ''}</td>
+                          <td><button class="button danger" onclick="deleteTransfer(${tr.id})">Delete</button></td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>
+        <style>
+          .transfer-group-body {
+            transition: max-height 0.6s cubic-bezier(.4,0,.2,1), box-shadow 0.3s, opacity 0.3s;
+            background: linear-gradient(90deg,#e0f7fa 0%,#b2ebf2 100%);
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 8px 24px rgba(67,233,123,0.10);
+            margin-top: 0.1em;
+            max-height: 0;
+            opacity: 0.7;
+          }
+          .transfer-group-body.expanded {
+            max-height: 600px;
+            opacity: 1;
+            box-shadow: 0 12px 32px rgba(67,233,123,0.18);
+          }
+          .transfer-group-inner {
+            padding: 1em 1em 0.5em 1em;
+            animation: fadeInSlide 0.6s;
+          }
+          @keyframes fadeInSlide {
+            from { opacity:0; transform:translateY(-20px);}
+            to { opacity:1; transform:translateY(0);}
+          }
+        </style>
+        `;
+        document.getElementById('transferGrid').innerHTML = html;
+      } catch (err) {
+        forceLogoutOnError();
+      }
+    }
+
+    added openSidebar(); after all enableapp();
+    openSidebar();
+
+
+
+
+    // --- Income Form ---
+document.getElementById('incomeForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this));
+  const res = await authFetch('/entries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ ...data, category: 'income' })
+  });
+  this.amount.value = '';
+  this.note.value = '';
+  showBalances();
+  fetchSavings();
+  fetchIncome({ reset: true }); // <-- update here
+};
+
+// --- Expense Form ---
+document.getElementById('expenseForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this));
+  const res = await authFetch('/entries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ ...data, category: 'expense' })
+  });
+  this.amount.value = '';
+  this.note.value = '';
+  showBalances();
+  fetchSavings();
+  fetchExpenses({ reset: true }); // <-- update here
+};

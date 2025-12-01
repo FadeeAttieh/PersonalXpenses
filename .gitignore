@@ -3,6 +3,6 @@ node_modules/
 *.log
 .DS_Store
 database_backup.sql
-*.txt
 .vscode/
 .idea/
+migrations_backup/

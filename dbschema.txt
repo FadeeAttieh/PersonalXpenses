@@ -1,0 +1,775 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 17.4
+-- Dumped by pg_dump version 17.0
+
+-- Started on 2025-08-25 19:43:50 EEST
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 874 (class 1247 OID 45829)
+-- Name: enum_Entries_category; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."enum_Entries_category" AS ENUM (
+    'income',
+    'expense'
+);
+
+
+ALTER TYPE public."enum_Entries_category" OWNER TO postgres;
+
+--
+-- TOC entry 877 (class 1247 OID 45834)
+-- Name: enum_Types_category; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."enum_Types_category" AS ENUM (
+    'income',
+    'expense'
+);
+
+
+ALTER TYPE public."enum_Types_category" OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 228 (class 1259 OID 45888)
+-- Name: Balances; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Balances" (
+    id integer NOT NULL,
+    "userId" integer NOT NULL,
+    currency character varying(255) NOT NULL,
+    amount numeric(18,2) NOT NULL,
+    month character varying(255) NOT NULL,
+    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    initial_amount numeric(18,2)
+);
+
+
+ALTER TABLE public."Balances" OWNER TO postgres;
+
+--
+-- TOC entry 227 (class 1259 OID 45887)
+-- Name: Balances_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Balances_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Balances_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3832 (class 0 OID 0)
+-- Dependencies: 227
+-- Name: Balances_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Balances_id_seq" OWNED BY public."Balances".id;
+
+
+--
+-- TOC entry 219 (class 1259 OID 45811)
+-- Name: ClosedMonths; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."ClosedMonths" (
+    id integer NOT NULL,
+    "userId" integer NOT NULL,
+    currency character varying(255) NOT NULL,
+    month character varying(255) NOT NULL,
+    "closedAt" timestamp with time zone,
+    "createdAt" timestamp with time zone,
+    "updatedAt" timestamp with time zone
+);
+
+
+ALTER TABLE public."ClosedMonths" OWNER TO postgres;
+
+--
+-- TOC entry 218 (class 1259 OID 45810)
+-- Name: ClosedMonths_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."ClosedMonths_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."ClosedMonths_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3833 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: ClosedMonths_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."ClosedMonths_id_seq" OWNED BY public."ClosedMonths".id;
+
+
+--
+-- TOC entry 220 (class 1259 OID 45821)
+-- Name: Currencies; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Currencies" (
+    code character varying(10) NOT NULL,
+    name character varying(50) NOT NULL,
+    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public."Currencies" OWNER TO postgres;
+
+--
+-- TOC entry 226 (class 1259 OID 45867)
+-- Name: Entries; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Entries" (
+    id integer NOT NULL,
+    amount numeric(18,2) NOT NULL,
+    currency character varying(255) NOT NULL,
+    date timestamp with time zone NOT NULL,
+    category public."enum_Entries_category" NOT NULL,
+    note character varying(255),
+    "userId" integer NOT NULL,
+    "typeId" integer NOT NULL,
+    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    locked boolean DEFAULT false
+);
+
+
+ALTER TABLE public."Entries" OWNER TO postgres;
+
+--
+-- TOC entry 225 (class 1259 OID 45866)
+-- Name: Entries_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Entries_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Entries_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3834 (class 0 OID 0)
+-- Dependencies: 225
+-- Name: Entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Entries_id_seq" OWNED BY public."Entries".id;
+
+
+--
+-- TOC entry 234 (class 1259 OID 45945)
+-- Name: MonthCloseAudits; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."MonthCloseAudits" (
+    id integer NOT NULL,
+    "userId" integer NOT NULL,
+    currency character varying(255) NOT NULL,
+    month character varying(255) NOT NULL,
+    calculated_money_on_hand numeric(18,2) NOT NULL,
+    entered_money_on_hand numeric(18,2) NOT NULL,
+    calculated_savings numeric(18,2) NOT NULL,
+    entered_savings numeric(18,2) NOT NULL,
+    difference_money_on_hand numeric(18,2) NOT NULL,
+    difference_savings numeric(18,2) NOT NULL,
+    closed_at timestamp with time zone DEFAULT now() NOT NULL,
+    note character varying(255)
+);
+
+
+ALTER TABLE public."MonthCloseAudits" OWNER TO postgres;
+
+--
+-- TOC entry 233 (class 1259 OID 45944)
+-- Name: MonthCloseAudits_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."MonthCloseAudits_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."MonthCloseAudits_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3835 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: MonthCloseAudits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."MonthCloseAudits_id_seq" OWNED BY public."MonthCloseAudits".id;
+
+
+--
+-- TOC entry 230 (class 1259 OID 45906)
+-- Name: Savings; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Savings" (
+    id integer NOT NULL,
+    "userId" integer NOT NULL,
+    currency character varying(255) NOT NULL,
+    amount numeric(18,2) NOT NULL,
+    note character varying(255),
+    date date NOT NULL,
+    locked boolean DEFAULT false,
+    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public."Savings" OWNER TO postgres;
+
+--
+-- TOC entry 229 (class 1259 OID 45905)
+-- Name: Savings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Savings_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Savings_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3836 (class 0 OID 0)
+-- Dependencies: 229
+-- Name: Savings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Savings_id_seq" OWNED BY public."Savings".id;
+
+
+--
+-- TOC entry 217 (class 1259 OID 45805)
+-- Name: SequelizeMeta; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."SequelizeMeta" (
+    name character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public."SequelizeMeta" OWNER TO postgres;
+
+--
+-- TOC entry 236 (class 1259 OID 45955)
+-- Name: Transfers; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Transfers" (
+    id integer NOT NULL,
+    "userId" integer NOT NULL,
+    currency character varying(255) NOT NULL,
+    amount numeric(18,2) NOT NULL,
+    from_account character varying(255) NOT NULL,
+    to_account character varying(255) NOT NULL,
+    date date NOT NULL,
+    note character varying(255),
+    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    locked boolean DEFAULT false
+);
+
+
+ALTER TABLE public."Transfers" OWNER TO postgres;
+
+--
+-- TOC entry 235 (class 1259 OID 45954)
+-- Name: Transfers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Transfers_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Transfers_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3837 (class 0 OID 0)
+-- Dependencies: 235
+-- Name: Transfers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Transfers_id_seq" OWNED BY public."Transfers".id;
+
+
+--
+-- TOC entry 224 (class 1259 OID 45853)
+-- Name: Types; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Types" (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    category public."enum_Types_category" NOT NULL,
+    "userId" integer NOT NULL,
+    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    description character varying(255)
+);
+
+
+ALTER TABLE public."Types" OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 45852)
+-- Name: Types_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Types_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Types_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3838 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: Types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Types_id_seq" OWNED BY public."Types".id;
+
+
+--
+-- TOC entry 232 (class 1259 OID 45923)
+-- Name: UserCurrencies; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."UserCurrencies" (
+    id integer NOT NULL,
+    "userId" integer NOT NULL,
+    "currencyCode" character varying(10) NOT NULL,
+    active boolean DEFAULT true,
+    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public."UserCurrencies" OWNER TO postgres;
+
+--
+-- TOC entry 231 (class 1259 OID 45922)
+-- Name: UserCurrencies_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."UserCurrencies_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."UserCurrencies_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3839 (class 0 OID 0)
+-- Dependencies: 231
+-- Name: UserCurrencies_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."UserCurrencies_id_seq" OWNED BY public."UserCurrencies".id;
+
+
+--
+-- TOC entry 222 (class 1259 OID 45840)
+-- Name: Users; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Users" (
+    id integer NOT NULL,
+    username character varying(255) NOT NULL,
+    pin character varying(255) NOT NULL,
+    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    email character varying(255),
+    email_verified boolean DEFAULT false,
+    email_verification_code character varying(10)
+);
+
+
+ALTER TABLE public."Users" OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 45839)
+-- Name: Users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Users_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Users_id_seq" OWNER TO postgres;
+
+--
+-- TOC entry 3840 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: Users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Users_id_seq" OWNED BY public."Users".id;
+
+
+--
+-- TOC entry 3625 (class 2604 OID 45891)
+-- Name: Balances id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Balances" ALTER COLUMN id SET DEFAULT nextval('public."Balances_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3611 (class 2604 OID 45814)
+-- Name: ClosedMonths id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."ClosedMonths" ALTER COLUMN id SET DEFAULT nextval('public."ClosedMonths_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3621 (class 2604 OID 45870)
+-- Name: Entries id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Entries" ALTER COLUMN id SET DEFAULT nextval('public."Entries_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3636 (class 2604 OID 45948)
+-- Name: MonthCloseAudits id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."MonthCloseAudits" ALTER COLUMN id SET DEFAULT nextval('public."MonthCloseAudits_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3628 (class 2604 OID 45909)
+-- Name: Savings id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Savings" ALTER COLUMN id SET DEFAULT nextval('public."Savings_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3638 (class 2604 OID 45958)
+-- Name: Transfers id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Transfers" ALTER COLUMN id SET DEFAULT nextval('public."Transfers_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3618 (class 2604 OID 45856)
+-- Name: Types id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Types" ALTER COLUMN id SET DEFAULT nextval('public."Types_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3632 (class 2604 OID 45926)
+-- Name: UserCurrencies id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."UserCurrencies" ALTER COLUMN id SET DEFAULT nextval('public."UserCurrencies_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3614 (class 2604 OID 45843)
+-- Name: Users id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Users" ALTER COLUMN id SET DEFAULT nextval('public."Users_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3661 (class 2606 OID 45897)
+-- Name: Balances Balances_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Balances"
+    ADD CONSTRAINT "Balances_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3645 (class 2606 OID 45818)
+-- Name: ClosedMonths ClosedMonths_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."ClosedMonths"
+    ADD CONSTRAINT "ClosedMonths_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3649 (class 2606 OID 45827)
+-- Name: Currencies Currencies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Currencies"
+    ADD CONSTRAINT "Currencies_pkey" PRIMARY KEY (code);
+
+
+--
+-- TOC entry 3659 (class 2606 OID 45876)
+-- Name: Entries Entries_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Entries"
+    ADD CONSTRAINT "Entries_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3671 (class 2606 OID 45953)
+-- Name: MonthCloseAudits MonthCloseAudits_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."MonthCloseAudits"
+    ADD CONSTRAINT "MonthCloseAudits_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3665 (class 2606 OID 45916)
+-- Name: Savings Savings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Savings"
+    ADD CONSTRAINT "Savings_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3643 (class 2606 OID 45809)
+-- Name: SequelizeMeta SequelizeMeta_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."SequelizeMeta"
+    ADD CONSTRAINT "SequelizeMeta_pkey" PRIMARY KEY (name);
+
+
+--
+-- TOC entry 3673 (class 2606 OID 45964)
+-- Name: Transfers Transfers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Transfers"
+    ADD CONSTRAINT "Transfers_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3657 (class 2606 OID 45860)
+-- Name: Types Types_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Types"
+    ADD CONSTRAINT "Types_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3667 (class 2606 OID 45931)
+-- Name: UserCurrencies UserCurrencies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."UserCurrencies"
+    ADD CONSTRAINT "UserCurrencies_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3651 (class 2606 OID 45981)
+-- Name: Users Users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Users"
+    ADD CONSTRAINT "Users_email_key" UNIQUE (email);
+
+
+--
+-- TOC entry 3653 (class 2606 OID 45849)
+-- Name: Users Users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Users"
+    ADD CONSTRAINT "Users_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3655 (class 2606 OID 45851)
+-- Name: Users Users_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Users"
+    ADD CONSTRAINT "Users_username_key" UNIQUE (username);
+
+
+--
+-- TOC entry 3669 (class 2606 OID 45943)
+-- Name: UserCurrencies unique_user_currency; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."UserCurrencies"
+    ADD CONSTRAINT unique_user_currency UNIQUE ("userId", "currencyCode");
+
+
+--
+-- TOC entry 3647 (class 2606 OID 45820)
+-- Name: ClosedMonths unique_user_currency_month; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."ClosedMonths"
+    ADD CONSTRAINT unique_user_currency_month UNIQUE ("userId", currency, month);
+
+
+--
+-- TOC entry 3663 (class 2606 OID 45904)
+-- Name: Balances unique_user_currency_month_balance; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Balances"
+    ADD CONSTRAINT unique_user_currency_month_balance UNIQUE ("userId", currency, month);
+
+
+--
+-- TOC entry 3677 (class 2606 OID 45898)
+-- Name: Balances Balances_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Balances"
+    ADD CONSTRAINT "Balances_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3675 (class 2606 OID 45882)
+-- Name: Entries Entries_typeId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Entries"
+    ADD CONSTRAINT "Entries_typeId_fkey" FOREIGN KEY ("typeId") REFERENCES public."Types"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3676 (class 2606 OID 45877)
+-- Name: Entries Entries_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Entries"
+    ADD CONSTRAINT "Entries_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3678 (class 2606 OID 45917)
+-- Name: Savings Savings_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Savings"
+    ADD CONSTRAINT "Savings_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3681 (class 2606 OID 45965)
+-- Name: Transfers Transfers_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Transfers"
+    ADD CONSTRAINT "Transfers_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3674 (class 2606 OID 45861)
+-- Name: Types Types_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Types"
+    ADD CONSTRAINT "Types_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3679 (class 2606 OID 45937)
+-- Name: UserCurrencies UserCurrencies_currencyCode_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."UserCurrencies"
+    ADD CONSTRAINT "UserCurrencies_currencyCode_fkey" FOREIGN KEY ("currencyCode") REFERENCES public."Currencies"(code) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3680 (class 2606 OID 45932)
+-- Name: UserCurrencies UserCurrencies_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."UserCurrencies"
+    ADD CONSTRAINT "UserCurrencies_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."Users"(id) ON DELETE CASCADE;
+
+
+-- Completed on 2025-08-25 19:43:50 EEST
+
+--
+-- PostgreSQL database dump complete
+--
+

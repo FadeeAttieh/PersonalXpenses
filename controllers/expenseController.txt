@@ -1,0 +1,57 @@
+const { Entry, Type, User } = require('../models');
+
+
+exports.createExpense = async (req, res, next) => {
+  try {
+    const { amount, currency, date, note, typeId } = req.body;
+    const userId = req.user.id;
+    // Ensure type is expense
+    const type = await Type.findOne({ where: { id: typeId, category: 'expense', userId } });
+    if (!type) return res.status(400).json({ error: 'Invalid expense type.' });
+    const entry = await Entry.create({
+      amount, currency, date, note, typeId, userId, category: 'expense'
+    });
+    res.status(201).json(entry);
+  } catch (err) {
+  console.error(err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
+}
+   // next(err);
+  
+};
+
+exports.getAllExpenses = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 30;
+    const offset = parseInt(req.query.offset) || 0;
+    const entries = await Entry.findAll({
+      where: { userId, category: 'expense' },
+      include: [{ model: Type }],
+      order: [['date', 'DESC']],
+      limit,
+      offset
+    });
+    res.json(entries);
+  } catch (err) {
+  console.error(err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
+}
+    //next(err);
+  
+};
+
+exports.deleteExpense = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const id = req.params.id;
+    const deleted = await Entry.destroy({ where: { id, userId, category: 'expense' } });
+    if (!deleted) return res.status(404).json({ error: 'Expense entry not found.' });
+    res.status(204).end();
+  } catch (err) {
+  console.error(err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
+}
+   // next(err);
+  
+};

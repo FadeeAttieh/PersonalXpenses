@@ -1,0 +1,7 @@
+module.exports = (req, res, next) => {
+  // Example: check required fields
+  if (!req.body.amount || !req.body.currency) {
+    return res.status(400).json({ error: 'Amount and currency are required.' });
+  }
+  next();
+};

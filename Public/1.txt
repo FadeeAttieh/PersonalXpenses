@@ -1,0 +1,29 @@
+document.getElementById('loginForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this));
+  const res = await authFetch('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  const result = await res.json();
+  if (res.ok && result.token) {
+    localStorage.setItem('jwtToken', result.token);
+    hideSection('login');
+    hideSection('register');
+    showProfile({ username: data.username }); // or fetch user info if needed
+    enableApp();
+    showSection('balances'); // or your default section
+    if (localStorage.getItem('jwtToken')) {
+      //checkMonthClose();
+    }
+  } else if (res.status === 403 && result.error && result.error.includes('Email not verified')) {
+    document.getElementById('loginResult').innerText = result.error;
+    // Show verification form and pre-fill email
+    showSection('register'); // Or showSection('verify') if you use a standalone section
+    document.getElementById('verificationSection').style.display = '';
+    document.querySelector('#verifyEmailForm [name="email"]').value = data.username.includes('@') ? data.username : '';
+  } else {
+    document.getElementById('loginResult').innerText = result.error || 'Login failed';
+  }
+};

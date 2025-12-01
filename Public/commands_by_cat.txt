@@ -1,0 +1,196 @@
+==========================
+DOCKER & DEV CONTAINER
+==========================
+
+# Start all services (app + db + pgadmin) in the background
+docker compose up -d
+
+# Check running containers
+docker compose ps
+
+# View logs for all services
+docker compose logs
+
+# View logs for specific service (app, db, or pgadmin)
+docker compose logs app
+docker compose logs db
+docker compose logs pgadmin
+
+# Stop all services (containers remain, can be restarted)
+docker compose stop
+
+# Stop and remove all containers
+docker compose down
+
+# Restart a specific service (use after backend code changes)
+docker compose restart app
+
+# Open a shell in the app container
+docker compose exec app bash
+
+# Open a shell in the db container
+docker compose exec db bash
+
+# Rebuild containers after Dockerfile or package.json changes
+docker compose build --no-cache
+docker compose up -d
+
+# Rebuild and reopen the dev container in VS Code
+Dev Containers: Rebuild and Reopen in Container
+
+==========================
+POSTGRESQL DATABASE
+==========================
+
+# Connect to the database using psql
+docker compose exec db psql -U codespace -d personal_finance_db
+
+# Drop enum types manually (inside psql)
+-- Run these commands in the psql prompt to remove enum types if needed:
+DROP TYPE IF EXISTS "enum_Entries_category";
+DROP TYPE IF EXISTS "enum_Types_category";
+
+# List all tables in the current database (inside psql)
+\dt
+
+# Quit
+
+# Drop and recreate the database (from shell)
+docker compose exec db psql -U codespace -c 'DROP DATABASE personal_finance_db;'
+docker compose exec db psql -U codespace -c 'CREATE DATABASE personal_finance_db;'
+
+# Drop all tables in the current database (inside psql)
+# WARNING: This will remove ALL tables and their data!
+DO $$ DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = current_schema()) LOOP
+        EXECUTE 'DROP TABLE IF EXISTS "' || r.tablename || '" CASCADE';
+    END LOOP;
+END $$;
+
+==========================
+SEQUELIZE CLI (MIGRATIONS & SEEDERS)
+==========================
+
+# Run all migrations
+docker compose exec app npx sequelize-cli db:migrate
+
+# Undo the most recent migration
+docker compose exec app npx sequelize-cli db:migrate:undo
+
+# Undo all migrations
+docker compose exec app npx sequelize-cli db:migrate:undo:all
+
+# Generate a new migration file
+docker compose exec app npx sequelize-cli migration:generate --name <migration-name>
+
+# Run all seeders
+docker compose exec app npx sequelize-cli db:seed:all
+
+==========================
+AFTER CODE MODIFICATIONS
+==========================
+
+# Frontend changes only (HTML, CSS, JS in Public/)
+→ Just refresh your browser (Ctrl+R or F5)
+
+# Backend changes (controllers, routes, models, middleware)
+docker compose restart app
+
+# Database schema changes (new migrations)
+docker compose exec app npx sequelize-cli db:migrate
+
+# Package.json changes (new npm dependencies)
+docker compose down
+docker compose build
+docker compose up -d
+
+
+logout()
+or
+localStorage.removeItem('jwtToken');
+localStorage.removeItem('user');
+location.reload();
+
+
+==========================
+GENERAL TROUBLESHOOTING
+==========================
+
+# Rebuild containers after Dockerfile or dependency changes
+docker compose build --no-cache
+docker compose up -d
+
+==========================
+WHAT WAS INSTALLED FOR YOUR APP
+==========================
+
+- Node.js (via Dockerfile: FROM node:20)
+- npm dependencies (via npm install in Dockerfile and postCreateCommand)
+- PostgreSQL (as a Docker Compose service, not in the app container)
+- Sequelize CLI (as a dev dependency in your Node.js project)
+- VS Code Extensions (via devcontainer.json):
+    - ESLint (dbaeumer.vscode-eslint)
+    - Prettier (esbenp.prettier-vscode)
+
+==========================
+CONFIG FILES USED
+==========================
+
+- docker-compose.yml (defines app and db services)
+- devcontainer.json (dev container setup for VS Code)
+- Dockerfile (for building the app container)
+- config/config.json (Sequelize DB configuration)
+- .devcontainer/devcontainer.json (development container configuration)
+
+==========================
+GIT VERSION CONTROL
+==========================
+
+# Stage all changes
+git add .
+
+# Commit staged changes with a message
+git commit -m "Your commit message"
+
+# Push commits to the remote repository
+git push
+
+# Check repository status
+git status
+
+# View commit history
+git log --oneline
+
+==========================
+PGADMIN (POSTGRES WEB GUI)
+==========================
+
+# Start the pgAdmin service
+docker compose up -d pgadmin
+
+# Restart the pgAdmin service
+docker compose restart pgadmin
+
+#check that pgadmin is running
+docker compose ps
+
+# View logs for pgAdmin
+docker compose logs pgadmin
+
+# Access pgAdmin in your browser (after forwarding port 8080)
+$BROWSER http://localhost:8080
+# Or, use the forwarded URL provided by your dev environment (e.g., Codespaces or Dev Containers)
+
+# Default pgAdmin login credentials (set in docker-compose.yml)
+# Email:    admin@admin.com
+# Password: admin
+
+# Register a new PostgreSQL server in pgAdmin:
+#   - Host: db
+#   - Port: 5432
+#   - Username: codespace
+#   - Password: codespace
+
+
