@@ -14,6 +14,7 @@ let sequelize;
 console.log('Environment:', env);
 console.log('DATABASE_URL exists?', !!process.env.DATABASE_URL);
 console.log('DATABASE_PRIVATE_URL exists?', !!process.env.DATABASE_PRIVATE_URL);
+console.log('DATABASE_PUBLIC_URL exists?', !!process.env.DATABASE_PUBLIC_URL);
 console.log('PGHOST exists?', !!process.env.PGHOST);
 
 // Priority 1: Use Railway's private network URL (FREE, no egress fees)
@@ -23,12 +24,39 @@ if (process.env.DATABASE_PRIVATE_URL) {
     dialect: 'postgres',
     logging: console.log,
     dialectOptions: {
-      // Private network doesn't need SSL
       ssl: false
     }
   });
 }
-// Priority 2: Check for Railway's individual PG variables with private domain
+// Priority 2: Use Railway's public database URL (may incur egress fees)
+else if (process.env.DATABASE_PUBLIC_URL) {
+  console.log('Using DATABASE_PUBLIC_URL (Railway public network - may incur egress fees)');
+  sequelize = new Sequelize(process.env.DATABASE_PUBLIC_URL, {
+    dialect: 'postgres',
+    logging: console.log,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
+  });
+}
+// Priority 3: Use DATABASE_URL (standard variable)
+else if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
+  console.log('Using DATABASE_URL connection');
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    logging: console.log,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
+  });
+}
+// Priority 4: Check for Railway's individual PG variables
 else if (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE) {
   console.log('Using Railway PG variables');
   const usePrivate = process.env.PGHOST.includes('railway.internal');
@@ -52,20 +80,7 @@ else if (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && p
     }
   );
 }
-// Priority 3: Check if DATABASE_URL is provided (Railway public, Heroku, etc.)
-else if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
-  console.log('Using DATABASE_URL connection (public - may incur egress fees)');
-  sequelize = new Sequelize(process.env.DATABASE_URL, {
-    dialect: 'postgres',
-    logging: console.log,
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
-      }
-    }
-  });
-} else if (config.use_env_variable && process.env[config.use_env_variable]) {
+else if (config.use_env_variable && process.env[config.use_env_variable]) {
   console.log('Using config.use_env_variable:', config.use_env_variable);
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
