@@ -13,9 +13,31 @@ let sequelize;
 // Log environment for debugging
 console.log('Environment:', env);
 console.log('DATABASE_URL exists?', !!process.env.DATABASE_URL);
+console.log('PGHOST exists?', !!process.env.PGHOST);
 
-// Check if DATABASE_URL is provided (Railway, Heroku, etc.)
-if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
+// Priority 1: Check for Railway's individual PG variables (most reliable)
+if (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE) {
+  console.log('Using Railway PG variables');
+  sequelize = new Sequelize(
+    process.env.PGDATABASE,
+    process.env.PGUSER,
+    process.env.PGPASSWORD,
+    {
+      host: process.env.PGHOST,
+      port: process.env.PGPORT || 5432,
+      dialect: 'postgres',
+      logging: console.log,
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      }
+    }
+  );
+}
+// Priority 2: Check if DATABASE_URL is provided (Railway, Heroku, etc.)
+else if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
   console.log('Using DATABASE_URL connection');
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
