@@ -10,8 +10,13 @@ const db = {};
 
 let sequelize;
 
+// Log environment for debugging
+console.log('Environment:', env);
+console.log('DATABASE_URL exists?', !!process.env.DATABASE_URL);
+
 // Check if DATABASE_URL is provided (Railway, Heroku, etc.)
-if (process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
+  console.log('Using DATABASE_URL connection');
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     logging: console.log,
@@ -22,16 +27,19 @@ if (process.env.DATABASE_URL) {
       }
     }
   });
-} else if (config.use_env_variable) {
-  // Fallback to use_env_variable from config
+} else if (config.use_env_variable && process.env[config.use_env_variable]) {
+  console.log('Using config.use_env_variable:', config.use_env_variable);
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
   // Use individual connection parameters (Docker, local development)
+  console.log('Using individual connection parameters');
   const dbName = process.env.DATABASE_NAME || process.env.DB1_NAME || config.database;
   const dbUser = process.env.DATABASE_USER || process.env.DB1_USER || config.username;
   const dbPass = process.env.DATABASE_PASSWORD || process.env.DB1_PASSWORD || config.password;
   const dbHost = process.env.DATABASE_HOST || process.env.DB1_HOST || config.host;
   const dbPort = process.env.DATABASE_PORT || process.env.DB1_PORT || 5432;
+
+  console.log('DB Config:', { dbHost, dbPort, dbName, dbUser });
 
   sequelize = new Sequelize(dbName, dbUser, dbPass, {
     host: dbHost,
