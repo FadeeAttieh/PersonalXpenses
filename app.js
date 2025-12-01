@@ -1,0 +1,81 @@
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const { sequelize } = require('./models');
+const authRoutes = require('./routes/auth');
+//const incomeRoutes = require('./routes/income');
+//const expenseRoutes = require('./routes/expenses');
+const typeRoutes = require('./routes/types');
+const savingsRoutes = require('./routes/savings');
+const transferRoutes = require('./routes/transfers');
+const reportRoutes = require('./routes/report');
+const balanceRoutes = require('./routes/balances');
+const dashboardRoutes = require('./routes/dashboard');
+const errorHandler = require('./middleware/errorHandler'); // You should create this file
+const path = require('path');
+const balancesRouter = require('./routes/balances');
+const csurf = require('csurf');
+const cookieParser = require('cookie-parser');
+const authJwt = require('./middleware/authJwt');
+
+const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Session setup (for demonstration, use a secure store in production)
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+// Serve static files (CSS, images, etc.) - NO CSRF protection here
+app.use(express.static(path.join(__dirname, 'Public')));
+
+// Root route - serve index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Public', 'index.html'));
+});
+
+// CSRF protection setup
+const csrfProtection = csurf({ cookie: true });
+
+// Endpoint to get CSRF token (no CSRF validation needed for getting the token)
+app.get('/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
+// Auth routes (register/login do not require auth but need CSRF)
+app.use('/auth', csrfProtection, authRoutes);
+
+// Register user routes (require CSRF and JWT auth)
+const userRoutes = require('./routes/user');
+app.use('/user', csrfProtection, authJwt, userRoutes);
+
+// Protect routes (except /auth)
+app.use('/entries', csrfProtection, authJwt, require('./routes/entries'));
+app.use('/savings', csrfProtection, authJwt, require('./routes/savings'));
+app.use('/balances', csrfProtection, authJwt, require('./routes/balances'));
+app.use('/types', csrfProtection, authJwt, typeRoutes);
+app.use('/transfers', csrfProtection, authJwt, transferRoutes);
+app.use('/report', csrfProtection, authJwt, reportRoutes);
+app.use('/api/dashboard', authJwt, dashboardRoutes);
+
+// Error handler (should be last)
+app.use(errorHandler);
+
+// Sync DB and start server
+const PORT = process.env.PORT || 3000;
+sequelize.sync()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('Sequelize sync error:', err);
+    process.exit(1); // Optional: exit if sync fails
+  });

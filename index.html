@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Personal Expenses App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Add Bootstrap Icons CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+<!-- Add Clusterize.js CDN before your main script -->
+  <script src="https://unpkg.com/clusterize.js@0.18.1/clusterize.min.js"></script>
+  <!-- Cloudflare Turnstile -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+  <div class="theme-selector">
+  </div>
+
+<div id="sidebarBackdrop"></div>
+<!-- Sidebar menu -->
+<nav id="sidebar" aria-label="Main menu">
+  <button id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+  <div id="profileMenu">
+  <img id="profilePicMenu" src="" alt="Profile">
+  <span id="profileNameMenu"></span>
+  <button onclick="logout()" class="button">Logout</button>
+</div>
+  <div class="sidebar-links">
+    <a href="#" id="registerLink" class="menu-link" onclick="showSection('register')">Register</a>
+    <a href="#" id="loginLink" class="menu-link" onclick="showSection('login')">Login</a>
+    <a href="#" class="menu-link" onclick="showSection('income')">Income</a>
+    <a href="#" class="menu-link" onclick="showSection('expenses')">Expenses</a>
+    <a href="#" class="menu-link" onclick="showSection('types')">Types</a>
+    <a href="#" class="menu-link" onclick="showSection('savings')">Savings</a>
+    <a href="#" class="menu-link" onclick="showSection('transfers')">Transfers</a>
+    <a href="#" class="menu-link" onclick="showSection('reports')">Reports</a>
+    <a href="#" class="menu-link" onclick="showSection('balances')">Balances</a>
+
+    <!-- Currency switch below balances -->
+  <!--div class="currency-switch menu-currency-switch" style="margin-top:1em;"-->
+    <!-- Dynamic currency buttons will be rendered here -->
+  <!--/div-->
+  <!--button id="chooseCurrenciesBtn" class="button" style="margin-top:0.5em;">Choose Currencies</button-->
+
+  <!-- Currency picker modal -->
+  <div id="currencyPickerModal" class="modal">
+  <div class="modal-content">
+      <h3>Select up to 2 currencies</h3>
+      <div id="currencyOptions"></div>
+      <button id="saveCurrenciesBtn" class="button">Save</button>
+      <button id="closeCurrencyPicker" class="button danger">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Theme selector below currency switch -->
+  <div class="theme-selector menu-theme-selector">
+    <label for="themeSelect"><b>Theme:</b></label>
+    <select id="themeSelect">
+      <option value="fancy-table">Friendly (Default)</option>
+      <option value="modern-table">Modern</option>
+      <option value="classic-table">Classic</option>
+      <option value="business-table">Business</option>
+      <option value="dark-table">Dark</option>
+      <option value="light-table">Light</option>
+      <option value="childish-table">Childish</option>
+      <option value="christmas-table">Christmas</option>
+    </select>
+  </div>
+  </div>
+  </nav>
+
+<!-- Close month modal -->
+<div id="closeMonthModal" class="modal">
+  <div class="modal-content">
+    <h3>Close Month</h3>
+    <div id="closeMonthSummary"></div>
+    <form id="closeMonthForm">
+      <div id="closeMonthCurrencies"></div>
+      <button type="submit" class="button">Confirm & Start New Month</button>
+    </form>
+    <div id="closeMonthError"></div>
+  </div>
+</div>
+
+  <div class="container">
+    <!-- Add this inside your .container div, before or after your sections -->
+<div id="currencyFabContainer">
+  <button id="currencyFabBtn" class="currency-fab-btn"></button>
+  <div id="currencyFabMenu" class="currency-fab-menu"></div>
+</div>
+    <!-- Register -->
+    <section id="register" style="display:none;">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <label>Username: <input name="username" required></label><br>
+        <label>PIN: <input name="pin" type="password" required></label><br>
+        <label>Email: <input name="email" type="email" required></label><br>
+        <button type="submit" class="button">Register</button>
+      </form>
+      <div id="registerResult"></div>
+      <div id="verificationSection" style="display:none;">
+        <h3>Email Verification</h3>
+        <form id="verifyEmailForm">
+          <label>Email: <input name="email" type="email" required></label>
+          <label>Verification Code: <input name="code" required></label>
+          <button type="submit" class="button">Verify</button>
+        </form>
+        <div id="verifyResult"></div>
+        <button type="button" id="resendCodeBtn">Resend Code</button>
+        <div id="resendResult"></div>
+      </div>
+    </section>
+    <!-- Login -->
+    <section id="login" style="display:none;">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input name="username" placeholder="Username" required>
+        <input name="pin" type="password" placeholder="PIN" required>
+        <!-- Cloudflare Turnstile Widget -->
+        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-action="login" data-theme="light"></div>
+        <button type="submit" class="button" id="loginButton">Login</button>
+      </form>
+      <div id="loginResult"></div>
+    </section>
+    <!-- Income -->
+    <section id="income" style="display:none;">
+      <h2>Add Income</h2>
+      <div id="incomeBalances" class="balance-info"></div>
+      <form id="incomeForm">
+        <input name="amount" placeholder="Amount" required>
+        <select name="currency" id="incomeCurrency" required>
+          <option value="USD">USD</option>
+          <option value="LBP">LBP</option>
+        </select>
+        <input name="date" type="datetime-local" id="incomeDate" required>
+        <input name="note" placeholder="Note">
+        <select name="typeId" id="incomeType" required>
+          <!-- Populated by JS with income types -->
+        </select>
+        <button type="submit" class="button">Add Income</button>
+      </form>
+      <div id="incomeResult"></div>
+      <div id="incomeGrid"></div> <!-- Data grid for income -->
+    </section>
+
+    <!-- Expenses -->
+    <section id="expenses" style="display:none;">
+      <h2>Add Expense</h2>
+      <div id="expensesBalances" class="balance-info"></div>
+      <form id="expenseForm">
+        <input name="amount" placeholder="Amount" required>
+        <select name="currency" id="expenseCurrency" required>
+          <option value="USD">USD</option>
+          <option value="LBP">LBP</option>
+        </select>
+        <input name="date" type="datetime-local" id="expenseDate" required>
+        <input name="note" placeholder="Note">
+        <select name="typeId" id="expenseType" required>
+          <!-- Populated by JS with expense types -->
+        </select>
+        <button type="submit" class="button">Add Expense</button>
+      </form>
+      <div id="expenseResult"></div>
+      <div id="expenseGrid"></div> <!-- Data grid for expenses -->
+    </section>
+    <!-- Types -->
+    <section id="types" style="display:none;">
+      <h2>Add Type</h2>
+      <form id="typeForm">
+        <input name="name" placeholder="Type Name" required>
+        <select name="category" required>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <button type="submit" class="button">Add Type</button>
+      </form>
+      <div id="typeResult"></div>
+      <div id="typeGrid"></div> <!-- Data grid for types -->
+    </section>
+    <!-- Savings -->
+    <section id="savings" style="display:none;">
+      <h2>Add Savings</h2>
+      <div id="savingsBalances" class="balance-info"></div>
+      <form id="savingsForm">
+        <input name="amount" placeholder="Amount" required>
+        <select name="currency" id="savingsCurrency" required>
+          <option value="USD">USD</option>
+          <option value="LBP">LBP</option>
+        </select>
+        <input name="date" type="datetime-local" id="savingsDate" required>
+        <input name="note" placeholder="Note">
+        <button type="submit" class="button">Add Savings</button>
+      </form>
+      <div id="savingsResult"></div>
+      <div id="savingsGrid"></div> <!-- Data grid for savings -->
+    </section>
+    <!-- Transfers -->
+    <section id="transfers" style="display:none;">
+      <h2>Add Transfer</h2>
+      <div id="transfersBalances" class="balance-info"></div>
+      <form id="transferForm">
+        <select name="from_account" id="transferFrom" required>
+          <option value="money_on_hand">Money on Hand</option>
+          <option value="savings">Savings</option>
+        </select>
+        <select name="to_account" id="transferTo" required>
+          <option value="savings">Savings</option>
+          <option value="money_on_hand">Money on Hand</option>
+        </select>
+        <input name="amount" placeholder="Amount" required>
+        <select name="currency" id="transferCurrency" required>
+          <option value="USD">USD</option>
+          <option value="LBP">LBP</option>
+        </select>
+        <input name="date" type="datetime-local" id="transferDate" required>
+        <input name="note" placeholder="Note">
+        <button type="submit" class="button">Add Transfer</button>
+      </form>
+      <div id="transferResult"></div>
+      <div id="transferGrid"></div> <!-- Data grid for transfers -->
+    </section>
+    <!-- Reports -->
+    <section id="reports" style="display:none;">
+      <h2>Monthly Report</h2>
+      <form id="reportForm">
+        <select name="month" id="reportMonth" required></select>
+        <select name="year" id="reportYear" required></select>
+        <select name="currency" id="reportCurrency" required>
+          <option value="USD">USD</option>
+          <option value="LBP">LBP</option>
+        </select>
+        <button type="submit" class="button">Get Report</button>
+      </form>
+      <div class="report-tabs" style="margin-top:2em;">
+        <button class="report-tab active" id="tabBalance" onclick="showReportTab('balance')">Balance Overview</button>
+        <button class="report-tab" id="tabSavings" onclick="showReportTab('savings')">Savings Overview</button>
+      </div>
+      <div id="reportTabBalance" class="report-tab-content">
+        <div id="reportResult"></div>
+      </div>
+      <div id="reportTabSavings" class="report-tab-content" style="display:none;">
+        <div id="savingsReportResult"></div>
+      </div>
+    </section>
+    <!-- Balances -->
+    <section id="balances" style="display:none;">
+      <form id="balanceForm">
+        <select name="currency" id="balanceCurrency" required>
+          <!-- options will be filled dynamically -->
+        </select>
+        <input name="amount" placeholder="Amount" required>
+        <button type="submit" class="button">Save Balance</button>
+      </form>
+      <div id="balanceResult"></div>
+      <div id="actualBalances"></div>
+      <div id="broughtForward"></div>
+    </section>
+    <!-- Profile -->
+    <div id="profile" style="display:none;">
+      <img id="profilePic" src="" alt="Profile" style="width:40px;height:40px;border-radius:50%;">
+      <span id="profileName"></span>
+      <button onclick="logout()" class="button">Logout</button>
+    </div>
+  </div>
+</div>
+  <script>
+    const THEME_KEY = 'appTheme';
+    
+    // Currency constants - must be defined before any functions use them
+    const CURRENCY_KEY = 'appCurrencies';
+    const MAX_CURRENCIES = 2;
+    
+    const SUPPORTED_CURRENCIES = [
+      { code: 'USD', label: 'US Dollar', icon: '🇺🇸' },
+      { code: 'LBP', label: 'Lebanese Lira', icon: '🇱🇧' },
+      { code: 'EUR', label: 'Euro', icon: '🇪🇺' },
+      { code: 'GBP', label: 'British Pound', icon: '🇬🇧' },
+      { code: 'CAD', label: 'Canadian Dollar', icon: '🇨🇦' },
+      { code: 'JPY', label: 'Japanese Yen', icon: '🇯🇵' },
+      { code: 'TRY', label: 'Turkish Lira', icon: '🇹🇷' }
+    ];
+    
+    const CURRENCY_BILL_IMAGES = {
+      USD: "img/currency_bills/usd.png",
+      LBP: "img/currency_bills/lbp.png",
+      EUR: "img/currency_bills/eur.png",
+      GBP: "img/currency_bills/gbp.png",
+      CAD: "img/currency_bills/cad.png",
+      JPY: "img/currency_bills/jpy.png",
+      TRY: "img/currency_bills/try.png"
+    };
+    
+// Add this near the top of your <script> in index.html
+  function authFetch(url, options = {}) {
+  const token = localStorage.getItem('jwtToken');
+  options.headers = options.headers || {};
+  options.headers['Authorization'] = `Bearer ${token}`;
+  // If CSRF token is needed for POST/PUT, add it here:
+  const csrfToken = getCookie('XSRF-TOKEN');
+  if (csrfToken && (options.method === 'POST' || options.method === 'PUT' || options.method === 'DELETE')) {
+    options.headers['X-CSRF-Token'] = csrfToken;
+  }
+  return fetch(url, options);
+}
+
+// Helper to get cookie value by name
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+    
+  // --- Place this at the top of your main script block ---
+  function forceLogoutOnError() {
+   // localStorage.removeItem('user');
+    //hideProfile();
+    //disableApp();
+    //showSection('login');
+  logout();
+  }
+
+
+
+function applyAppTheme(theme) {
+  document.body.classList.remove(
+    'theme-fancy', 'theme-modern', 'theme-classic', 'theme-business',
+    'theme-dark', 'theme-light', 'theme-childish', 'theme-christmas'
+  );
+  document.body.classList.add('theme-' + theme.replace('-table', ''));
+}
+
+
+document.getElementById('balanceForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const form = this;
+  const currency = form.currency.value;
+  const amount = parseFloat(form.amount.value);
+  const resultDiv = document.getElementById('balanceResult');
+  resultDiv.innerText = '';
+  try {
+    const res = await authFetch('/balances', { // Changed Authorization to authFetch
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ currency, amount })
+    });
+    const data = await res.json();
+    if (res.status === 201) {
+      resultDiv.innerHTML = `<span style="color:green;">Initial balance for <b>${currency}</b> set to ${amount}.</span>`;
+      form.querySelector('button[type="submit"]').disabled = true;
+      form.querySelector('input[name="amount"]').disabled = true;
+      showBalances();
+    } else if (data && data.error) {
+      resultDiv.innerHTML = `<span style="color:red;">${data.error}</span>`;
+    } else {
+      resultDiv.innerHTML = `<span style="color:red;">Could not save balance.</span>`;
+    }
+  } catch (err) {
+    resultDiv.innerHTML = `<span style="color:red;">Error saving balance.</span>`;
+  }
+};
+
+document.getElementById('themeSelect').addEventListener('change', function() {
+  const theme = this.value;
+  localStorage.setItem(THEME_KEY, theme);
+  applyAppTheme(theme);
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Theme setup
+  const theme = localStorage.getItem('appTheme') || 'fancy-table';
+  document.getElementById('themeSelect').value = theme;
+  applyAppTheme(theme);
+
+  // Currency FAB
+  renderCurrencyFab();
+  setCurrency(getCurrency());
+  updateReportCurrencyDropdown();
+
+  // Transfer dropdown sync
+  const fromSelect = document.getElementById('transferFrom');
+  const toSelect = document.getElementById('transferTo');
+  function syncTransferDropdowns() {
+    if (fromSelect.value === 'money_on_hand') {
+      toSelect.value = 'savings';
+    } else {
+      toSelect.value = 'money_on_hand';
+    }
+  }
+  fromSelect.addEventListener('change', syncTransferDropdowns);
+  toSelect.addEventListener('change', () => {
+    if (toSelect.value === 'money_on_hand') {
+      fromSelect.value = 'savings';
+    } else {
+      fromSelect.value = 'money_on_hand';
+    }
+  });
+  syncTransferDropdowns();
+
+  // Month close check (only after login)
+  /*if (localStorage.getItem('jwtToken')) {
+    checkMonthClose();
+  }*/
+});
+
+// --- Currency Switch Logic ---
+
+// Render selected currencies as buttons
+/*function renderCurrencySwitch() {
+  const selected = getSelectedCurrencies();
+  const container = document.querySelector('.currency-switch.menu-currency-switch');
+  container.innerHTML = '';
+  selected.forEach(code => {
+    const currency = SUPPORTED_CURRENCIES.find(c => c.code === code);
+    if (!currency) return;
+    const btn = document.createElement('button');
+    btn.className = 'currency-btn' + (getCurrency() === code ? ' active' : '');
+    btn.type = 'button';
+    btn.innerHTML = `<span style="font-size:1.2em;">${currency.icon}</span> ${currency.code}`;
+    btn.disabled = getCurrency() === code;
+    btn.onclick = () => setCurrency(code);
+    container.appendChild(btn);
+  });
+}*/
+function renderCurrencyFab() {
+  const selected = getSelectedCurrencies();
+  const fabBtn = document.getElementById('currencyFabBtn');
+  const fabMenu = document.getElementById('currencyFabMenu');
+  if (!fabBtn || !fabMenu) return;
+
+  // Show the current currency flag/icon on the FAB
+  const current = getCurrency();
+  const currency = SUPPORTED_CURRENCIES.find(c => c.code === current);
+  const billImg = CURRENCY_BILL_IMAGES[current];
+  fabBtn.innerHTML = billImg
+  ? `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;">
+        <img src="${billImg}" alt="${current} bill" style="width:28px;height:18px;object-fit:cover;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.13);margin-bottom:1px;">
+        <span style="font-size:0.78em;font-weight:bold;color:#333;letter-spacing:1px;line-height:1;">${current}</span>
+     </div>`
+  : (currency ? `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;">
+        <span style="font-size:1.3em;">${currency.icon}</span>
+        <span style="font-size:0.78em;font-weight:bold;color:#333;letter-spacing:1px;line-height:1;">${current}</span>
+     </div>` : '💱');
+
+  // Build the menu with all selected currencies
+  fabMenu.innerHTML = '';
+  selected.forEach(code => {
+    const cur = SUPPORTED_CURRENCIES.find(c => c.code === code);
+    if (!cur) return;
+    const btn = document.createElement('button');
+    btn.className = 'currency-menu-btn' + (current === code ? ' active' : '');
+    btn.type = 'button';
+    const menuImg = CURRENCY_BILL_IMAGES[code];
+    btn.innerHTML = menuImg
+  ? `<div class="currency-fab-menu-imgwrap">
+        <img src="${menuImg}" alt="${code} bill" class="currency-fab-menu-img">
+        <span class="currency-fab-menu-code">${code}</span>
+     </div>`
+  : `<div class="currency-fab-menu-imgwrap">
+        <span style="font-size:2em;">${cur.icon}</span>
+        <span class="currency-fab-menu-code">${code}</span>
+     </div>`;
+    btn.onclick = () => {
+      setCurrency(code);
+      fabMenu.style.display = 'none';
+    };
+    fabMenu.appendChild(btn);
+  });
+}
+
+// Toggle menu on FAB click
+document.addEventListener('DOMContentLoaded', () => {
+  const fabBtn = document.getElementById('currencyFabBtn');
+  const fabMenu = document.getElementById('currencyFabMenu');
+  if (fabBtn && fabMenu) {
+    fabBtn.onclick = (e) => {
+      e.stopPropagation();
+      fabMenu.style.display = fabMenu.style.display === 'none' ? 'block' : 'none';
+    };
+    // Hide menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!fabMenu.contains(e.target) && e.target !== fabBtn) {
+        fabMenu.style.display = 'none';
+      }
+    });
+  }
+  renderCurrencyFab();
+});
+
+// Save and get selected currencies
+function getSelectedCurrencies() {
+  return JSON.parse(localStorage.getItem(CURRENCY_KEY) || '["USD","LBP"]');
+}
+function setSelectedCurrencies(arr) {
+  localStorage.setItem(CURRENCY_KEY, JSON.stringify(arr));
+  // If current currency is not in arr, switch to the first
+  if (!arr.includes(getCurrency())) setCurrency(arr[0]);
+  renderCurrencyFab()
+}
+
+// Set/get current currency
+function setCurrency(code) {
+  localStorage.setItem('appCurrency', code);
+  renderCurrencyFab();
+  updateCurrencyInSections(code);
+  updateReportCurrencyDropdown();
+  if (typeof fetchIncome === 'function') fetchIncome();
+  if (typeof fetchExpenses === 'function') fetchExpenses();
+}
+function getCurrency() {
+  return localStorage.getItem('appCurrency') || getSelectedCurrencies()[0];
+}
+
+// Currency picker modal logic
+/*
+document.getElementById('chooseCurrenciesBtn').onclick = () => {
+  const modal = document.getElementById('currencyPickerModal');
+  const optionsDiv = document.getElementById('currencyOptions');
+  const selected = getSelectedCurrencies();
+  optionsDiv.innerHTML = '';
+  SUPPORTED_CURRENCIES.forEach(cur => {
+    const id = 'cur_' + cur.code;
+    optionsDiv.innerHTML += `
+      <label>
+        <input type="checkbox" id="${id}" value="${cur.code}" ${selected.includes(cur.code) ? 'checked' : ''}>
+        <span style="font-size:1.2em;">${cur.icon}</span> ${cur.label} (${cur.code})
+      </label>
+    `;
+  });
+  modal.style.display = 'flex';
+};
+*/
+document.getElementById('closeCurrencyPicker').onclick = () => {
+  document.getElementById('currencyPickerModal').style.display = 'none';
+};
+document.getElementById('saveCurrenciesBtn').onclick = async () => {
+  const checked = Array.from(document.querySelectorAll('#currencyOptions input[type=checkbox]:checked')).map(cb => cb.value);
+  if (checked.length === 0 || checked.length > MAX_CURRENCIES) {
+    alert('Please select 1 or 2 currencies.');
+    return;
+  }
+  setSelectedCurrencies(checked);
+  document.getElementById('currencyPickerModal').style.display = 'none';
+
+  // Send to backend to save in UserCurrency table
+  await authFetch('/user/currencies', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ currencies: checked })
+  });
+
+  // Continue app flow
+  let lastSection = localStorage.getItem('lastSection') || 'balances';
+  showSection(lastSection);
+  resetIdleTimer();
+};
+
+    // --- Currency Switch Logic ---
+//const CURRENCY_KEY = 'appCurrency';
+
+//function setCurrency(currency) {
+  //localStorage.setItem(CURRENCY_KEY, currency);
+  //document.getElementById('currencyUSD').classList.toggle('active', currency === 'USD');
+  //document.getElementById('currencyLBP').classList.toggle('active', currency === 'LBP');
+  //document.getElementById('currencyUSD').disabled = currency === 'USD';
+  //document.getElementById('currencyLBP').disabled = currency === 'LBP';
+  // Update all sections to reflect the selected currency
+//  updateCurrencyInSections(currency);
+//}
+
+//function getCurrency() {
+  //return localStorage.getItem(CURRENCY_KEY) || 'USD';
+//}
+
+//document.getElementById('currencyUSD').addEventListener('click', () => setCurrency('USD'));
+//document.getElementById('currencyLBP').addEventListener('click', () => setCurrency('LBP'));
+
+
+
+    // Update all sections to use the selected currency
+function updateCurrencyInSections(currency) {
+  // Set currency dropdowns if present
+  ['incomeCurrency', 'expenseCurrency', 'savingsCurrency', 'transferCurrency', 'reportCurrency', 'balanceCurrency'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = currency;
+  });
+  // Update balances and brought forward in all sections
+  showBalances();
+  showSectionBalances('income', currency);
+  showSectionBalances('expenses', currency);
+  showSectionBalances('savings', currency);
+  showSectionBalances('transfers', currency);
+}
+
+// Show balances (brought forward and actual)
+async function showBalances() {
+  // Only fetch if logged in
+  if (!localStorage.getItem('jwtToken')) {
+    // Optionally clear balances UI
+    const actualBalances = document.getElementById('actualBalances');
+    const broughtForward = document.getElementById('broughtForward');
+    if (actualBalances) actualBalances.innerHTML = '';
+    if (broughtForward) broughtForward.innerHTML = '';
+    return;
+  }
+  try {
+    const currency = getCurrency();
+    const res = await authFetch('/balances', { credentials: 'include' });
+    if (res.status === 401) {
+      forceLogoutOnError();
+      return;
+    }
+    let balances = await res.json();
+    if (!Array.isArray(balances)) {
+      document.getElementById('actualBalances').innerHTML = '<span style="color:red;">Could not load balances.</span>';
+      return;
+    }
+    // Find if the selected currency already has a balance
+    const bal = balances.find(b => b.currency === currency) || { initialBalance: 0, moneyOnHand: 0 };
+
+    // Modern card style for balances
+    let html = `<div style="display: flex; flex-wrap: wrap; gap: 1.5em; justify-content: center;">`;
+      balances.forEach(b => {
+  html += `
+    <div style="
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      color: #222;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(67,233,123,0.13);
+      padding: 2em 2.5em;
+      min-width: 220px;
+      margin-bottom: 1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    ">
+      <div style="font-size:2.5em; margin-bottom:0.5em;">💳</div>
+      <div style="font-size:1.2em; font-weight:bold;">${b.currency}</div>
+      <div style="margin:0.7em 0 0.2em 0; font-size:1.1em;">
+        <span>Brought Forward: <b>${b.initialBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</b></span>
+      </div>
+      <div style="margin:0.2em 0; font-size:1.1em;">
+        <span>Closing Balance: <b>${b.closingBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</b></span>
+      </div>
+      <div style="font-size:1.3em; color:#fff; background:rgba(0,0,0,0.13); border-radius:12px; padding:0.4em 1.2em; margin:0.5em 0;">
+        <span style="font-size:1.1em;">Money on Hand:</span>
+        <span style="font-weight:bold; margin-left:0.5em;">${b.moneyOnHand.toLocaleString(undefined, {minimumFractionDigits:2})}</span>
+      </div>
+      <div style="font-size:1.1em; margin-top:0.3em;">
+        <span>Savings: <b>${b.savings.toLocaleString(undefined, {minimumFractionDigits:2})}</b></span>
+      </div>
+    </div>
+  `;
+});
+html += `</div>`;
+document.getElementById('actualBalances').innerHTML = html;
+
+    // Lock/unlock form as before
+    const selected = getSelectedCurrencies();
+    const hasAll = selected.every(cur => balances.some(b => b.currency === cur));
+    const balanceForm = document.getElementById('balanceForm');
+    const balanceResult = document.getElementById('balanceResult');
+    // Disable the balance input if the selected currency already has a balance
+    if (bal && bal.initialBalance > 0) {
+      balanceResult.innerHTML = `<span style="color:green;">Initial balance for <b>${currency}</b> is set. You cannot change it.</span>`;
+      if (balanceForm) balanceForm.querySelector('button[type="submit"]').disabled = true;
+      if (balanceForm) balanceForm.querySelector('input[name="amount"]').disabled = true;
+    } else {
+      balanceResult.innerHTML = '';
+      if (balanceForm) balanceForm.querySelector('button[type="submit"]').disabled = false;
+      if (balanceForm) balanceForm.querySelector('input[name="amount"]').disabled = false;
+    }
+
+    // Show brought forward for selected currency
+    const now = new Date();
+    const params = new URLSearchParams({
+      month: now.getMonth() + 1,
+      year: now.getFullYear(),
+      currency
+    }).toString();
+    const reportRes = await authFetch('/report/monthly?' + params, { credentials: 'include' }); // Updated authfetch to authFetch
+    const report = await reportRes.json();
+    document.getElementById('broughtForward').innerHTML =
+      `<b>Brought Forward (month=${now.getMonth() + 1}, year=${now.getFullYear()}, currency=${currency}):</b> ${report.broughtForward}`;
+  } catch (err) {
+    forceLogoutOnError();
+  }
+}
+
+// Set default date to today for all date fields
+function setDefaultDates() {
+  const now = new Date();
+  const iso = now.toISOString().slice(0,16); // yyyy-MM-ddTHH:mm
+  ['incomeDate', 'expenseDate', 'savingsDate', 'transferDate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = iso;
+  });
+}
+
+// Populate type dropdowns for income and expenses
+async function populateTypeDropdowns() {
+  const res = await authFetch('/types', { credentials: 'include' });
+  let types = await res.json();
+  if (!Array.isArray(types)) {
+    // Show error or just return
+    alert(types.error || "Failed to load types.");
+    return;
+  }
+  // Expense types
+  const expenseType = document.getElementById('expenseType');
+  if (expenseType) {
+    expenseType.innerHTML = '';
+    types.filter(t => t.category === 'expense').forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.text = t.name;
+      expenseType.appendChild(opt);
+    });
+  }
+  // Income types
+  const incomeType = document.getElementById('incomeType');
+  if (incomeType) {
+    incomeType.innerHTML = '';
+    types.filter(t => t.category === 'income').forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.text = t.name;
+      incomeType.appendChild(opt);
+    });
+  }
+}
+
+function hideSection(id) {
+  const section = document.getElementById(id);
+  if (section) section.style.display = 'none';
+}
+// Call these when showing the relevant section
+function showSection(id) {
+    // Always hide login and register sections
+  hideSection('login');
+  hideSection('register');
+  document.querySelectorAll('.container section').forEach(sec => sec.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+  setDefaultDates();
+// Save last section to localStorage
+localStorage.setItem('lastSection', id);
+
+
+  const currency = getCurrency();
+  if (id === 'income' || id === 'expenses') populateTypeDropdowns();
+  if (id === 'income') {
+    showSectionBalances('income', currency);
+    fetchIncome();
+  }
+  if (id === 'expenses') {
+    showSectionBalances('expenses', currency);
+    fetchExpenses();
+  }
+  if (id === 'transfers') {
+    showSectionBalances('transfers', currency);
+    fetchTransfers();
+  }
+  if (id === 'savings') {
+    showSectionBalances('savings', currency);
+    lockSavingsFormIfExists();
+    fetchSavings();
+  }
+  if (id === 'types') {
+    fetchTypes();
+  }
+  if (id === 'balances') {
+    updateBalanceCurrencyDropdown();
+    showBalances();
+  }
+}
+
+
+    // Register (no credentials needed)
+    document.getElementById('registerForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      const res = await authFetch('/auth/register', { // Updated authF to authF
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (res.ok) {
+        document.getElementById('registerResult').innerText = 'Registration successful! Please check your email for the verification code.';
+        document.getElementById('verificationSection').style.display = '';
+        document.querySelector('#verifyEmailForm [name="email"]').value = localStorage.getItem('pendingVerificationEmail') || '';
+        localStorage.setItem('pendingVerificationEmail', data.email);
+      } else {
+        document.getElementById('registerResult').innerText = result.error || 'Registration failed';
+      }
+    };
+    
+    document.getElementById('verifyEmailForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      const res = await fetch('/auth/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (res.ok) {
+        document.getElementById('verifyResult').innerText = 'Email verified! You can now log in.';
+        showSection('login');
+      } else {
+        document.getElementById('verifyResult').innerText = result.error || 'Verification failed';
+      }
+    };
+    
+    document.getElementById('resendCodeBtn').onclick = async function() {
+      const email = document.querySelector('#verifyEmailForm [name="email"]').value;
+      const res = await fetch('/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const result = await res.json();
+      document.getElementById('resendResult').innerText = result.message || result.error || 'Failed to resend code';
+    };
+    
+    // Turnstile callback
+    window.onTurnstileSuccess = function(token) {
+      document.getElementById('loginButton').disabled = false;
+      document.getElementById('loginForm').dataset.turnstileToken = token;
+    };
+
+    // Login (credentials needed for session cookie)
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      const turnstileToken = this.dataset.turnstileToken;
+      
+      if (!turnstileToken) {
+        document.getElementById('loginResult').innerText = 'Please complete the verification';
+        return;
+      }
+      
+      data.turnstileToken = turnstileToken;
+      const res = await authFetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (res.ok && result.token) {
+        // --- PUT THIS BLOCK HERE ---
+    localStorage.setItem('jwtToken', result.token);
+    localStorage.setItem('user', JSON.stringify({ username: data.username }));
+    // --- END BLOCK ---
+    hideSection('login');
+    hideSection('register');
+   // showProfile({ username: data.username }); // or fetch user info if needed
+    //enableApp();
+    openSidebar();
+    //showSection('balances'); // or your default section
+      onLoginSuccess({ username: data.username }); // Pass user info if needed
+    if (localStorage.getItem('jwtToken')) {
+    /*toremove */
+    checkMonthClose();
+  }
+      } else {
+    // Show backend error or fallback message
+    document.getElementById('loginResult').innerText = result.error || result.message || 'Login failed';
+  }
+     /* else if (res.status === 403 && result.error && result.error.includes('Email not verified')) {
+        document.getElementById('loginResult').innerText = result.error;
+        // Show verification form and pre-fill email
+        showSection('register'); // Or showSection('verify') if you use a standalone section
+        document.getElementById('verificationSection').style.display = '';
+        document.querySelector('#verifyEmailForm [name="email"]').value = data.username.includes('@') ? data.username : '';
+      } else {
+        document.getElementById('loginResult').innerText = result.error || 'Login failed';
+      }*/
+    };
+    
+    // Show profile after login
+    function showProfile(user) {
+      // Show profile in menu
+      //document.getElementById('profileMenu').style.display = 'flex';
+      document.getElementById('profileNameMenu').innerText = user.username;
+      document.getElementById('profilePicMenu').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(user.username)}`;
+      
+      document.getElementById('currencyFabContainer').style.display = '';
+      // Hide register/login links in menu
+      const registerLink = document.getElementById('registerLink');
+      const loginLink = document.getElementById('loginLink');
+      if (registerLink) registerLink.style.display = 'none';
+      if (loginLink) loginLink.style.display = 'none';
+    
+      // (Optional) Hide profile section in main content if you have it
+      if (document.getElementById('profile')) document.getElementById('profile').style.display = 'none';
+      if (localStorage.getItem('jwtToken')) {
+   //toremove
+   checkMonthClose();
+  }
+    }
+    
+    function hideProfile() {
+      document.getElementById('currencyFabContainer').style.display = 'none';
+      //const profileMenu = document.getElementById('profileMenu');
+      //if (profileMenu) profileMenu.style.display = 'none';
+      const registerLink = document.getElementById('registerLink');
+      const loginLink = document.getElementById('loginLink');
+      if (registerLink) registerLink.style.display = '';
+      if (loginLink) loginLink.style.display = '';
+    }
+    
+    // --- Month Close Workflow ---
+
+const MONTH_CLOSE_KEY = 'lastClosedMonth';
+
+function getCurrentMonthStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+
+function getPreviousMonthStr() {
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth(); // 0-based, so this is previous month
+  if (month === 0) { // January
+    month = 12;
+    year -= 1;
+  }
+  return `${year}-${String(month).padStart(2, '0')}`;
+}
+
+async function isPreviousMonthClosedBackend() {
+  try {
+    const token = localStorage.getItem('jwtToken');
+    const res = await authFetch('/balances/needs-close');
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !data.needsClosing;
+  } catch (e) {
+    return false;
+  }
+}
+
+
+function lockAllSections() {
+  document.querySelectorAll('.container section, #profile').forEach(sec => {
+    sec.style.pointerEvents = 'none';
+    sec.style.opacity = '0.5';
+  });
+  document.getElementById('currencyFabContainer').style.pointerEvents = 'none';
+  document.getElementById('currencyFabContainer').style.opacity = '0.5';
+}
+
+function unlockAllSections() {
+  document.querySelectorAll('.container section, #profile').forEach(sec => {
+    sec.style.pointerEvents = '';
+    sec.style.opacity = '';
+  });
+  document.getElementById('currencyFabContainer').style.pointerEvents = '';
+  document.getElementById('currencyFabContainer').style.opacity = '';
+}
+
+function showCloseMonthModal(balances) {
+  // Show summary
+  let summary = '';
+  balances.forEach(b => {
+    summary += `<div><b>${b.currency}</b>:<br>
+      Money on Hand: <b>${b.moneyOnHand?.toLocaleString(undefined,{minimumFractionDigits:2}) ?? 0}</b><br>
+      Savings: <b>${b.savings !== undefined ? b.savings.toLocaleString(undefined,{minimumFractionDigits:2}) : 'N/A'}</b>
+    </div><hr>`;
+  });
+  summary += `<div style="color:#d32f2f;font-weight:bold;">You must close the previous month and set starting values for this month before continuing.</div>`;
+  document.getElementById('closeMonthSummary').innerHTML = summary;
+
+  // Render a row for each currency
+  const container = document.getElementById('closeMonthCurrencies');
+  container.innerHTML = '';
+  balances.forEach(b => {
+    container.innerHTML += `
+      <div class="close-month-currency-row" data-currency="${b.currency}" style="margin-bottom:1em; border-bottom:1px solid #eee; padding-bottom:1em;">
+        <div style="font-weight:bold; margin-bottom:0.5em;">${b.currency}</div>
+        <label style="display:block;margin-bottom:0.3em;">Money on Hand:
+          <input type="number" step="0.01" name="moneyOnHand" value="${b.moneyOnHand ?? ''}" required style="width:120px;">
+        </label>
+        <label style="display:block;margin-bottom:0.3em;">Savings:
+          <input type="number" step="0.01" name="savings" value="${b.savings ?? ''}" required style="width:120px;">
+        </label>
+      </div>
+    `;
+  });
+
+  document.getElementById('closeMonthModal').style.display = 'flex';
+}
+
+
+function hideCloseMonthModal() {
+  document.getElementById('closeMonthModal').style.display = 'none';
+  document.getElementById('closeMonthError').innerText = '';
+}
+
+async function checkMonthClose() {
+  const closed = await isPreviousMonthClosedBackend();
+  if (closed) {
+    unlockAllSections();
+    hideCloseMonthModal();
+    return;
+  }
+  lockAllSections();
+
+  // Fetch balances
+  let balances = [];
+  try {
+    const prevMonth = getPreviousMonthStr();
+    const res = await authFetch('/balances?month=' + prevMonth, { credentials: 'include' });
+    balances = await res.json();
+  } catch (e) {
+    balances = [];
+  }
+  if (!Array.isArray(balances)) {
+    document.getElementById('closeMonthSummary').innerHTML = '<span style="color:red;">Could not load balances.</span>';
+    return;
+  }
+  console.log('Balances passed to modal:', balances);
+  
+  //toremove
+  showCloseMonthModal(balances);
+ 
+}
+
+// Handle month close form submit
+const closeMonthForm = document.getElementById('closeMonthForm');
+if (closeMonthForm) {
+  closeMonthForm.onsubmit = async function(e) {
+    e.preventDefault();
+
+  // Gather all currencies' balances from the form
+  const balances = [];
+  document.querySelectorAll('.close-month-currency-row').forEach(row => {
+    balances.push({
+      currency: row.dataset.currency,
+      moneyOnHand: parseFloat(row.querySelector('input[name="moneyOnHand"]').value),
+      savings: parseFloat(row.querySelector('input[name="savings"]').value),
+     // balance: parseFloat(row.querySelector('input[name="balance"]').value)
+    });
+    
+  });
+  
+  
+  
+// Get CSRF token from cookie
+const csrfToken = getCookie('_csrf'); // <-- Use '_csrf' instead of 'XSRF-TOKEN'
+
+  console.log('Submitting close month:', { month: getPreviousMonthStr(), balances }); // <-- Add this
+  try {
+    const res = await authFetch('/balances/close-month', { // Updated to authFetch
+      method: 'POST',
+      credentials: 'include',
+       headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken // <-- Add this header
+      },
+      body: JSON.stringify({
+        month: getPreviousMonthStr(),
+        balances
+      })
+    });
+    if (!res.ok) throw new Error('Failed to close month');
+    localStorage.setItem('lastClosedMonth', getCurrentMonthStr());
+    hideCloseMonthModal();
+    unlockAllSections();
+    showBalances && showBalances();
+  } catch (err) {
+    document.getElementById('closeMonthError').innerText = 'Error closing month. Please try again.';
+  }
+};
+}
+
+// Hide modal on outside click
+document.getElementById('closeMonthModal').onclick = function(e) {
+  if (e.target === this) hideCloseMonthModal();
+};
+
+    // On page load, check if user info is in localStorage
+   window.onload = function() {
+  document.getElementById('currencyFabContainer').style.display = 'none';
+  populateMonthYear();
+  const token = localStorage.getItem('jwtToken');
+  const userStr = localStorage.getItem('user');
+ if (token && userStr) {
+    // Optionally fetch user info from backend if needed
+    const user = JSON.parse(userStr);
+  showProfile(user);
+    enableApp();
+    openSidebar();
+    showBalances();
+    const lastSection = localStorage.getItem('lastSection') || 'balances';
+    showSection(lastSection);
+  } else {
+    hideProfile();
+    disableApp();
+    showSection('login');
+  }
+};
+    
+    // Populate month and year dropdowns with current values as default
+    function populateMonthYear() {
+      const now = new Date();
+      const monthSelect = document.getElementById('reportMonth');
+      const yearSelect = document.getElementById('reportYear');
+      if (monthSelect && yearSelect) {
+        monthSelect.innerHTML = '';
+        yearSelect.innerHTML = '';
+        for (let m = 1; m <= 12; m++) {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.text = m;
+          if (m === now.getMonth() + 1) opt.selected = true;
+          monthSelect.appendChild(opt);
+        }
+        const thisYear = now.getFullYear();
+        for (let y = thisYear - 5; y <= thisYear + 5; y++) {
+          const opt = document.createElement('option');
+          opt.value = y;
+          opt.text = y;
+          if (y === thisYear) opt.selected = true;
+          yearSelect.appendChild(opt);
+        }
+      }
+    }
+    /*
+    // After successful login:
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      const res = await authFetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (res.ok && result.token) {
+        localStorage.setItem('jwtToken', result.token);
+        hideSection('login');
+    hideSection('register');
+    showProfile({ username: data.username }); // or fetch user info if needed
+    enableApp();
+    showSection('balances'); // or your default section
+    if (localStorage.getItem('jwtToken')) {
+    //checkMonthClose();
+  }
+    
+      } else if (res.status === 403 && result.error && result.error.includes('Email not verified')) {
+        document.getElementById('loginResult').innerText = result.error;
+        // Show verification form and pre-fill email
+        showSection('register'); // Or showSection('verify') if you use a standalone section
+        document.getElementById('verificationSection').style.display = '';
+        document.querySelector('#verifyEmailForm [name="email"]').value = data.username.includes('@') ? data.username : '';
+      } else {
+        document.getElementById('loginResult').innerText = result.error || 'Login failed';
+      }
+    };
+    */
+
+    // Logout function
+   // function logout() {
+     // localStorage.removeItem('user');
+      //hideProfile();
+    //  disableApp();
+    //  showSection('login');
+   // }
+    
+  document.getElementById('incomeForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this));
+  const res = await authFetch('/entries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ ...data, category: 'income' })
+  });
+  // Optionally show a result message
+const newItem = await res.json();
+  document.getElementById('incomeResult').innerText = res.ok ? 'Income added!' : (newItem.error || 'Failed to add income');
+  this.amount && (this.amount.value = '');
+  this.note && (this.note.value = '');
+  await showBalances();
+  if (typeof fetchSavings === 'function') fetchSavings();
+  // Add the new item to the correct group and re-render
+  fetchIncome({ reset: true });
+  //===============================
+  //incomeData.unshift(newItem);
+  //renderIncomeGrid();
+  //--------
+  //================================
+  //document.getElementById('incomeResult').innerText = await res.text();
+  //this.amount && (this.amount.value = '');
+  //this.note && (this.note.value = '');
+  //await showBalances();
+  //if (typeof fetchSavings === 'function') fetchSavings();
+  //fetchIncome({ reset: true }); // Always reload the list to ensure types and data are up to date
+};
+
+    let incomeOffset = 0;
+let incomeLimit = 50;
+let incomeHasMore = true;
+let incomeData = [];
+let incomeIsLoading = false;
+
+async function fetchIncome({ reset = false } = {}) {
+  if (!localStorage.getItem('jwtToken')) return; // <--- Add this line
+  if (incomeIsLoading) return;
+  
+  incomeIsLoading = true;
+  if (reset) {
+    incomeOffset = 0; incomeHasMore = true; incomeData = [];
+    document.getElementById('incomeGrid').innerHTML = '';
+  }
+  if (!incomeHasMore) return;
+  try {
+    const res = await authFetch(`/entries?category=income&limit=${incomeLimit}&offset=${incomeOffset}`, { credentials: 'include' });
+    if (res.status === 401) { forceLogoutOnError(); return; }
+    const data = await res.json();
+    if (data.length < incomeLimit) incomeHasMore = false;
+    incomeData = incomeData.concat(data);
+    incomeOffset += data.length;
+    renderIncomeGrid();
+  } catch (err) { forceLogoutOnError(); }
+  finally { incomeIsLoading = false; }
+}
+
+function toggleIncomeGroup(currency) {
+  if (!window.incomeGroupState) window.incomeGroupState = {};
+  // Collapse if already expanded, else expand only this group
+  window.incomeGroupState.expanded = (window.incomeGroupState.expanded === currency) ? null : currency;
+  renderIncomeGrid();
+}
+
+function renderIncomeGrid() {
+  const groups = {};
+  incomeData.forEach(i => {
+    if (!groups[i.currency]) groups[i.currency] = [];
+    groups[i.currency].push(i);
+  });
+  if (!window.incomeGroupState) window.incomeGroupState = {};
+  let html = `<div class="income-groups" style="margin-top:1em;">`;
+  Object.keys(groups).forEach(currency => {
+    const expanded = window.incomeGroupState.expanded === currency;
+    let totalIncome = groups[currency].reduce((sum, i) => sum + i.amount, 0);
+    html += `
+      <div class="income-group" style="margin-bottom:1em;">
+        <div class="income-group-header"
+          style="cursor:pointer;display:flex;align-items:center;gap:0.7em;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#43e97b 0%,#38f9d7 100%);color:#222;padding:0.9em 1.3em;border-radius:14px;box-shadow:0 2px 8px rgba(67,233,123,0.10);"
+          onclick="toggleIncomeGroup('${currency}')">
+          <span style="font-size:2em;">💵</span>
+          <span style="font-size:1.2em;">${currency}</span>
+        </div>
+        <div class="income-group-body${expanded ? ' expanded' : ''}" style="overflow:hidden;${expanded ? 'max-height:1000px;' : 'max-height:0;'};transition:max-height 0.3s;">
+          <div class="income-group-inner">
+            <div id="incomeClusterizeScroll_${currency}" class="clusterize-scroll" style="max-height:350px;overflow:auto;">
+              <table class="${getCurrentTableTheme()}" style="width:100%;">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Note</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="incomeClusterizeContent_${currency}" class="clusterize-content"></tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">Total Income:</td>
+                    <td style="font-weight:bold;">${totalIncome.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  document.getElementById('incomeGrid').innerHTML = html;
+
+  // Initialize Clusterize for each expanded group
+  Object.keys(groups).forEach(currency => {
+    if (window.incomeGroupState.expanded === currency) {
+      const rows = groups[currency].map(i => `
+        <tr class="income-row">
+          <td>${i.date ? new Date(i.date).toLocaleDateString() : ''}</td>
+          <td>${i.Type ? i.Type.name : ''}</td>
+          <td>${i.note || ''}</td>
+          <td>${i.amount}</td>
+          <td><button class="button danger" onclick="deleteIncome(${i.id})">Delete</button></td>
+        </tr>
+      `);
+      new Clusterize({
+        rows,
+        scrollId: `incomeClusterizeScroll_${currency}`,
+        contentId: `incomeClusterizeContent_${currency}`
+      });
+    }
+  });
+}
+
+// Infinite scroll event
+document.getElementById('incomeGrid').addEventListener('scroll', function() {
+  if (this.scrollTop + this.clientHeight >= this.scrollHeight - 50) fetchIncome();
+});
+
+
+    async function deleteIncome(id) {
+      await authFetch('/income/' + id, { method: 'DELETE', credentials: 'include' });
+      fetchIncome();
+    }
+    
+document.getElementById('expenseForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this));
+  const res = await authFetch('/entries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ ...data, category: 'expense' })
+  });
+  // Optionally show a result message
+ const newItem = await res.json();
+  document.getElementById('expenseResult').innerText = res.ok ? 'Expense added!' : (newItem.error || 'Failed to add expense');
+  this.amount && (this.amount.value = '');
+  this.note && (this.note.value = '');
+  await showBalances();
+  if (typeof fetchSavings === 'function') fetchSavings();
+  // Add the new item to the correct group and re-render
+fetchExpenses({ reset: true });
+  //====================================================
+  //expenseData.unshift(newItem);
+  //renderExpenseGrid();
+  //====================================================
+//  document.getElementById('expenseResult').innerText = await res.text();
+ // this.amount && (this.amount.value = '');
+ // this.note && (this.note.value = '');
+ // await showBalances();
+ // if (typeof fetchSavings === 'function') fetchSavings();
+  //fetchExpenses({ reset: true }); // Always reload the list to ensure types and data are up to date
+};
+
+    let expenseOffset = 0;
+let expenseLimit = 50;
+let expenseHasMore = true;
+let expenseData = [];
+let expenseIsLoading = false;
+
+async function fetchExpenses({ reset = false } = {}) {
+  if (!localStorage.getItem('jwtToken')) return; // <--- Add this line
+
+  if (expenseIsLoading) return;
+  expenseIsLoading = true;
+  if (reset) {
+    expenseOffset = 0; expenseHasMore = true; expenseData = [];
+    document.getElementById('expenseGrid').innerHTML = '';
+  }
+  if (!expenseHasMore) return;
+  try {
+    const res = await authFetch(`/entries?category=expense&limit=${expenseLimit}&offset=${expenseOffset}`, { credentials: 'include' });
+    if (res.status === 401) { forceLogoutOnError(); return; }
+    const data = await res.json();
+    if (data.length < expenseLimit) expenseHasMore = false;
+    expenseData = expenseData.concat(data);
+    expenseOffset += data.length;
+    renderExpenseGrid();
+  } catch (err) { forceLogoutOnError(); }
+  finally { expenseIsLoading = false; }
+}
+function toggleExpenseGroup(currency) {
+  if (!window.expenseGroupState) window.expenseGroupState = {};
+  // Collapse if already expanded, else expand only this group
+  window.expenseGroupState.expanded = (window.expenseGroupState.expanded === currency) ? null : currency;
+  renderExpenseGrid();
+}
+
+function renderExpenseGrid() {
+  const groups = {};
+  expenseData.forEach(i => {
+    if (!groups[i.currency]) groups[i.currency] = [];
+    groups[i.currency].push(i);
+  });
+  if (!window.expenseGroupState) window.expenseGroupState = {};
+  let html = `<div class="expense-groups" style="margin-top:1em;">`;
+  Object.keys(groups).forEach(currency => {
+    const expanded = window.expenseGroupState.expanded === currency;
+    let totalExpenses = groups[currency].reduce((sum, i) => sum + i.amount, 0);
+    html += `
+      <div class="expense-group" style="margin-bottom:1em;">
+        <div class="expense-group-header"
+          style="cursor:pointer;display:flex;align-items:center;gap:0.7em;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#ff5858 0%,#f09819 100%);color:#222;padding:0.9em 1.3em;border-radius:14px;box-shadow:0 2px 8px rgba(255,88,88,0.10);"
+          onclick="toggleExpenseGroup('${currency}')">
+          <span style="font-size:2em;">💸</span>
+          <span style="font-size:1.2em;">${currency}</span>
+        </div>
+        <div class="expense-group-body${expanded ? ' expanded' : ''}" style="overflow:hidden;${expanded ? 'max-height:1000px;' : 'max-height:0;'};transition:max-height 0.3s;">
+          <div class="expense-group-inner">
+            <div id="expenseClusterizeScroll_${currency}" class="clusterize-scroll" style="max-height:350px;overflow:auto;">
+              <table class="${getCurrentTableTheme()}" style="width:100%;">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Note</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="expenseClusterizeContent_${currency}" class="clusterize-content"></tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">Total Expenses:</td>
+                    <td style="font-weight:bold;">${totalExpenses.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  document.getElementById('expenseGrid').innerHTML = html;
+
+  // Initialize Clusterize for each expanded group
+  Object.keys(groups).forEach(currency => {
+    if (window.expenseGroupState.expanded === currency) {
+      const rows = groups[currency].map(i => `
+        <tr class="expense-row">
+          <td>${i.date ? new Date(i.date).toLocaleDateString() : ''}</td>
+          <td>${i.Type ? i.Type.name : ''}</td>
+          <td>${i.note || ''}</td>
+          <td>${i.amount}</td>
+          <td><button class="button danger" onclick="deleteExpense(${i.id})">Delete</button></td>
+        </tr>
+      `);
+      new Clusterize({
+        rows,
+        scrollId: `expenseClusterizeScroll_${currency}`,
+        contentId: `expenseClusterizeContent_${currency}`
+      });
+    }
+  });
+}
+
+// Infinite scroll event
+document.getElementById('expenseGrid').addEventListener('scroll', function() {
+  if (this.scrollTop + this.clientHeight >= this.scrollHeight - 50) fetchExpenses();
+});
+
+
+    
+    async function deleteExpense(id) {
+      await authFetch('/expenses/' + id, { method: 'DELETE', credentials: 'include' });
+      fetchExpenses();
+    }
+    
+    // Types
+    document.getElementById('typeForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      const res = await authFetch('/types', {  // Corrected authfetch to authFetch
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
+      document.getElementById('typeResult').innerText = await res.text();
+    };
+    let typeOffset = 0, typeLimit = 30, typeHasMore = true, typeIsLoading = false, typeData = [];
+
+    async function fetchTypes({ reset = false } = {}) {
+  if (typeIsLoading) return;
+  typeIsLoading = true;
+  if (reset) {
+    typeOffset = 0; typeHasMore = true; typeData = [];
+    document.getElementById('typeGrid').innerHTML = '';
+  }
+  if (!typeHasMore) return;
+  try {
+    const res = await authFetch(`/types?limit=${typeLimit}&offset=${typeOffset}`, { credentials: 'include' });
+    if (res.status === 401) { forceLogoutOnError(); return; }
+    const data = await res.json();
+    if (data.length < typeLimit) typeHasMore = false;
+    typeData = typeData.concat(data);
+    typeOffset += data.length;
+    renderTypeGrid();
+  } catch (err) { forceLogoutOnError(); }
+  finally { typeIsLoading = false; }
+}
+
+
+// Infinite scroll event
+document.getElementById('typeGrid').addEventListener('scroll', function() {
+  if (this.scrollTop + this.clientHeight >= this.scrollHeight - 50) fetchTypes();
+});
+
+// On add new type
+document.getElementById('typeForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this));
+  const res = await authFetch('/types', {  // Corrected authfetch to authFetch
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  });
+  const newItem = await res.json();
+  this.name.value = '';
+  typeData.unshift(newItem); // Show new item instantly
+  renderTypeGrid();
+};
+    
+    async function deleteType(id) {
+      await authFetch('/types/' + id, { method: 'DELETE', credentials: 'include' }); // Corrected authfetch to authFetch
+      fetchTypes();
+    }
+    
+    // Savings
+    document.getElementById('savingsForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      const res = await authFetch('/savings', {  // Corrected authfetch to authFetch
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      document.getElementById('savingsResult').innerText = await res.text();
+      this.amount.value = '';
+      this.note.value = '';
+      showBalances();
+    };
+    async function fetchSavings() {
+      try {
+
+        const res = await authFetch('/savings', { credentials: 'include' }); // Corrected authfetch to authFetch
+        if (res.status === 401) {
+          forceLogoutOnError();
+          return;
+        }
+        const data = await res.json();
+        let html = `<table class="${getCurrentTableTheme()}">
+        <tr>
+          <th>Date</th>
+          <th>Note</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Action</th>
+        </tr>`;
+      data.forEach(i => {
+        html += `<tr>
+          <td>${i.date ? new Date(i.date).toLocaleDateString() : ''}</td>
+          <td>${i.note || ''}</td>
+          <td>${i.amount}</td>
+          <td>${i.currency}</td>
+          <td><button class="button danger" onclick="deleteSavings(${i.id})">Delete</button></td>
+        </tr>`;
+      });
+      html += `</table>`;
+      document.getElementById('savingsGrid').innerHTML = html;
+    } catch (err) {
+      forceLogoutOnError();
+    }
+    }
+    async function deleteSavings(id) {
+      await authFetch('/savings/' + id, { method: 'DELETE', credentials: 'include' });
+     
+      fetchSavings();
+    }
+    
+    // Transfers
+    document.getElementById('transferForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      const res = await authFetch('/transfers', {  // Corrected authfetch to authFetch
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      document.getElementById('transferResult').innerText = await res.text();
+      this.amount.value = '';
+      this.note.value = '';
+      showBalances();
+      fetchSavings();
+      fetchTransfers(); // <-- reload transfers immediately
+    };
+    let transferOffset = 0, transferLimit = 30, transferHasMore = true, transferIsLoading = false, transferData = [];
+
+    async function fetchTransfers({ reset = false } = {}) {
+  if (transferIsLoading) return;
+  transferIsLoading = true;
+  if (reset) {
+    transferOffset = 0; transferHasMore = true; transferData = [];
+    document.getElementById('transferGrid').innerHTML = '';
+  }
+ 
+  if (!transferHasMore) return;
+  try {
+const res = await authFetch(`/transfers?limit=${transferLimit}&offset=${transferOffset}`, { credentials: 'include' });
+    if (res.status === 401) { forceLogoutOnError(); return; }
+    const data = await res.json();
+    if (data.length < transferLimit) transferHasMore = false;
+    transferData = transferData.concat(data);
+    transferOffset += data.length;
+    renderTransferGrid();
+  } catch (err) { forceLogoutOnError(); }
+  finally { transferIsLoading = false; }
+}
+
+function renderTransferGrid() {
+  // ...your grouping/expand/collapse code, but use transferData instead of fetching...
+}
+
+// Place these in your main script block in index.html (or in menu.js if you prefer)
+
+//let typeData = [];
+//let typeIsLoading = false;
+
+
+
+// Render expandable, scrollable type groups with Clusterize.js
+function renderTypeGrid() {
+  // Group types by category
+  const groups = {};
+  typeData.forEach(type => {
+    if (!groups[type.category]) groups[type.category] = [];
+    groups[type.category].push(type);
+  });
+
+  if (!window.typeGroupState) window.typeGroupState = {};
+
+  let html = `<div class="type-groups" style="margin-top:1em;">`;
+  Object.keys(groups).forEach(category => {
+    const expanded = !!window.typeGroupState[category];
+    html += `
+      <div class="type-group" style="margin-bottom:1em;">
+        <div class="type-group-header"
+          style="cursor:pointer;display:flex;align-items:center;gap:0.7em;font-size:1.1em;font-weight:bold;background:linear-gradient(90deg,#b3e5fc 0%,#81d4fa 100%);color:#222;padding:0.9em 1.3em;border-radius:14px;box-shadow:0 2px 8px rgba(33,150,243,0.10);transition:background 0.2s;"
+          onclick="expandTypeGroup('${category}')"
+        >
+          <span style="font-size:2em;filter:drop-shadow(0 2px 4px #38f9d7);">${category === 'income' ? '🟢' : '🔴'}</span>
+          <span style="font-size:1.2em;letter-spacing:1px;text-transform:capitalize;">${category}</span>
+          <span style="margin-left:auto;display:flex;align-items:center;">
+            <svg width="32" height="32" viewBox="0 0 24 24" style="transition:transform 0.4s cubic-bezier(.4,0,.2,1);transform:${expanded ? 'rotate(90deg)' : 'rotate(0deg)'}">
+              <defs>
+                <linearGradient id="arrowGradientType${category}" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#b3e5fc"/>
+                  <stop offset="100%" stop-color="#81d4fa"/>
+                </linearGradient>
+              </defs>
+              <polyline points="6 9 12 15 18 9" fill="none" stroke="url(#arrowGradientType${category})" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <div class="type-group-body${expanded ? ' expanded' : ''}" style="overflow:hidden;${expanded ? '' : 'max-height:0;'}">
+          <div class="type-group-inner">
+            <div id="typeClusterizeScroll_${category}" class="clusterize-scroll" style="max-height:350px;overflow:auto;">
+              <table class="${getCurrentTableTheme()}" style="width:100%;">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="typeClusterizeContent_${category}" class="clusterize-content"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  document.getElementById('typeGrid').innerHTML = html;
+
+  // Initialize Clusterize for each expanded group
+
+  Object.keys(groups).forEach(category => {
+    if (window.typeGroupState[category]) {
+      const rows = groups[category].map(i => `
+        <tr>
+          <td>${i.name}</td>
+          <td>${i.category}</td>
+          <td><button class="button danger" onclick="deleteType(${i.id})">Delete</button></td>
+        </tr>
+      `);
+      new Clusterize({
+        rows,
+        scrollId: `typeClusterizeScroll_${category}`,
+        contentId: `typeClusterizeContent_${category}`
+      });
+    }
+  });
+}
+
+// Expand/collapse logic for type groups (only one open at a time)
+
+function expandTypeGroup(category) {
+  if (!window.typeGroupState) window.typeGroupState = {};
+  const wasOpen = !!window.typeGroupState[category];
+  // Collapse all groups
+  Object.keys(window.typeGroupState).forEach(k => window.typeGroupState[k] = false);
+  // Toggle: expand if not open, collapse if open
+  if (!wasOpen) window.typeGroupState[category] = true;
+  renderTypeGrid(); // <-- Only re-render, do NOT fetch again
+}
+/*function expandTypeGroup(category) {
+  if (!window.typeGroupState) window.typeGroupState = {};
+  const wasOpen = !!window.typeGroupState[category];
+  // Collapse all groups
+  Object.keys(window.typeGroupState).forEach(k => window.typeGroupState[k] = false);
+  // Toggle: expand if not open, collapse if open
+  if (!wasOpen) window.typeGroupState[category] = true;
+  fetchTypes();
+}*/
+
+
+// Infinite scroll event
+document.getElementById('transferGrid').addEventListener('scroll', function() {
+  if (this.scrollTop + this.clientHeight >= this.scrollHeight - 50) fetchTransfers();
+});
+
+// On add new transfer
+document.getElementById('transferForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this));
+  const res = await authFetch('/transfers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  });
+  const newItem = await res.json();
+  this.amount.value = '';
+  this.note.value = '';
+  showBalances();
+  fetchSavings();
+  transferData.unshift(newItem); // Show new item instantly
+  renderTransferGrid();
+};
+   
+    async function deleteTransfer(id) {
+      await authFetch('/transfers/' + id, { method: 'DELETE', credentials: 'include' });
+      fetchTransfers();
+    }
+    
+    function getCurrentTableTheme() {
+      // Returns the current table theme class based on the selected theme
+      const theme = localStorage.getItem('appTheme') || 'fancy-table';
+      return theme;
+    }
+    
+    function showSectionBalances(section, currency) {
+      // Optionally fetch and display balances for the section
+      // Example: show money on hand or savings in the section's balance-info div
+      // You can expand this logic as needed
+      if (section === 'income') {
+        // Example: show money on hand for income section
+        // document.getElementById('incomeBalances').innerText = '...';
+      }
+      if (section === 'expenses') {
+        // document.getElementById('expensesBalances').innerText = '...';
+      }
+      if (section === 'savings') {
+        // document.getElementById('savingsBalances').innerText = '...';
+      }
+      if (section === 'transfers') {
+        // document.getElementById('transfersBalances').innerText = '...';
+      }
+    }
+
+    function updateReportCurrencyDropdown() {
+      const select = document.getElementById('reportCurrency');
+      if (!select) return;
+      select.innerHTML = '';
+      getSelectedCurrencies().forEach(cur => {
+        const option = document.createElement('option');
+        option.value = cur;
+        option.text = cur;
+        select.appendChild(option);
+      });
+      select.value = getCurrency();
+    }
+    
+    // Disable app (show only login/register)
+    function disableApp() {
+      // Hide all menu links and sections except login/register
+      document.querySelectorAll('.menu-link').forEach(link => link.style.display = 'none');
+      const registerLink = document.getElementById('registerLink');
+      const loginLink = document.getElementById('loginLink');
+      if (registerLink) registerLink.style.display = '';
+      if (loginLink) loginLink.style.display = '';
+      document.querySelectorAll('.container section').forEach(sec => sec.style.display = 'none');
+      // Optionally show only the login section
+      const loginSection = document.getElementById('login');
+      if (loginSection) loginSection.style.display = 'block';
+       document.body.classList.remove('logged-in');
+    }
+    
+    function enableApp() {
+      document.querySelectorAll('.menu-link').forEach(link => {
+        // Hide login/register links, show all others
+        if (link.id === 'loginLink' || link.id === 'registerLink') {
+          link.style.display = 'none';
+        } else {
+          link.style.display = '';
+        }
+      });
+       document.body.classList.add('logged-in');
+    }
+    
+    function updateBalanceCurrencyDropdown() {
+      const select = document.getElementById('balanceCurrency');
+      if (!select) return;
+      select.innerHTML = '';
+      getSelectedCurrencies().forEach(cur => {
+        const option = document.createElement('option');
+        option.value = cur;
+        option.text = cur;
+        select.appendChild(option);
+      });
+      select.value = getCurrency();
+    }
+    
+    function lockSavingsFormIfExists() {
+      // Example: lock the savings form if initial savings are set (customize as needed)
+      const savingsForm = document.getElementById('savingsForm');
+      if (!savingsForm) return;
+      // You can add logic here to disable the form or its button if needed
+      // For now, we'll just enable it
+      savingsForm.querySelector('button[type="submit"]').disabled = false;
+    }
+    
+    // Monthly report submission
+    document.getElementById('reportForm').onsubmit = async function(e) {
+      e.preventDefault();
+      try {
+        const data = Object.fromEntries(new FormData(this));
+        const params = new URLSearchParams(data).toString();
+        const res = await authFetch('/report/monthly?' + params, { credentials: 'include' });
+        if (res.status === 401) {
+          forceLogoutOnError();
+          return;
+        }
+        const report = await res.json();
+        let html = `
+  <div class="report-cards">
+    <div class="report-row">
+      <div class="report-card credit">
+        <div class="report-icon">📦</div>
+        <div class="report-label">Brought Forward</div>
+        <div class="report-value">${report.broughtForward?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+      </div>
+    </div>
+    <div class="report-row">
+      <div class="report-card credit">
+        <div class="report-icon">💰</div>
+        <div class="report-label">Total Income</div>
+        <div class="report-value">${report.totalIncome?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+      </div>
+      <div class="report-card debit">
+        <div class="report-icon">💸</div>
+        <div class="report-label">Total Expenses</div>
+        <div class="report-value">${report.totalExpenses?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+      </div>
+    </div>
+    <div class="report-row">
+      <div class="report-card credit">
+        <div class="report-icon">🏦⬇️</div>
+        <div class="report-label">Incoming Transfers</div>
+        <div class="report-value">${report.incomingTransfers?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+      </div>
+      <div class="report-card debit">
+        <div class="report-icon">🏦⬆️</div>
+        <div class="report-label">Outgoing Transfers</div>
+        <div class="report-value">${report.outgoingTransfers?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+      </div>
+    </div>
+    <div class="report-row">
+      <div class="report-card credit">
+        <div class="report-icon">🧮</div>
+        <div class="report-label">Net</div>
+        <div class="report-value">${report.net?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+      </div>
+    </div>
+  </div>
+`;
+document.getElementById('reportResult').innerHTML = html;
+        document.getElementById('reportResult').innerHTML = html;
+        renderSavingsReport(report);
+      } catch (err) {
+        forceLogoutOnError();
+      }
+    };
+
+    function showReportTab(tab) {
+  document.getElementById('reportTabBalance').style.display = tab === 'balance' ? '' : 'none';
+  document.getElementById('reportTabSavings').style.display = tab === 'savings' ? '' : 'none';
+  document.getElementById('tabBalance').classList.toggle('active', tab === 'balance');
+  document.getElementById('tabSavings').classList.toggle('active', tab === 'savings');
+}
+
+function renderSavingsReport(report) {
+  let html = `
+    <div class="report-cards">
+      <div class="report-row">
+        <div class="report-card credit">
+          <div class="report-icon">💰</div>
+          <div class="report-label">Savings This Month</div>
+          <div class="report-value">${report.savingsThisMonth?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+        </div>
+       
+      </div>
+      <div class="report-row">
+        <div class="report-card credit">
+          <div class="report-icon">🏦⬇️</div>
+          <div class="report-label">Incoming Savings Transfers</div>
+          <div class="report-value">${report.incomingSavingsTransfers?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+        </div>
+        <div class="report-card debit">
+          <div class="report-icon">🏦⬆️</div>
+          <div class="report-label">Outgoing Savings Transfers</div>
+          <div class="report-value">${report.outgoingSavingsTransfers?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+        </div>
+      </div>
+      <div class="report-row">
+        <div class="report-card credit">
+          <div class="report-icon">🧮</div>
+          <div class="report-label">Total Savings This Month</div>
+          <div class="report-value">${report.totalSavingsThisMonth?.toLocaleString(undefined, {minimumFractionDigits:2}) ?? 0}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('savingsReportResult').innerHTML = html;
+}
+    function expandTransferGroup(group) {
+  if (!window.transferGroupState) window.transferGroupState = {};
+  const wasOpen = !!window.transferGroupState[group];
+  // Collapse all groups
+  Object.keys(window.transferGroupState).forEach(k => window.transferGroupState[k] = false);
+  // Toggle: expand if not open, collapse if open
+  if (!wasOpen) window.transferGroupState[group] = true;
+  fetchTransfers();
+}
+    function expandIncomeGroup(currency) {
+      if (!window.incomeGroupState) window.incomeGroupState = {};
+      const wasOpen = !!window.incomeGroupState[currency];
+      Object.keys(window.incomeGroupState).forEach(k => window.incomeGroupState[k] = false);
+      if (!wasOpen) window.incomeGroupState[currency] = true;
+      fetchIncome();
+    }
+    function expandExpenseGroup(currency) {
+      if (!window.expenseGroupState) window.expenseGroupState = {};
+      const wasOpen = !!window.expenseGroupState[currency];
+      Object.keys(window.expenseGroupState).forEach(k => window.expenseGroupState[k] = false);
+      if (!wasOpen) window.expenseGroupState[currency] = true;
+      fetchExpenses();
+    }
+  
+let idleTimeout;
+
+function resetIdleTimer() {
+  clearTimeout(idleTimeout);
+  idleTimeout = setTimeout(() => {
+    logout();
+    setTimeout(() => {
+      alert('You have been logged out due to inactivity.');
+    }, 100); // slight delay to ensure UI updates before alert
+  }, 5 * 60 * 1000); // 5 minutes
+}
+// Attach event listeners for user activity
+['mousemove', 'keydown', 'mousedown', 'touchstart'].forEach(evt =>
+  document.addEventListener(evt, () => {
+    // Only reset timer if logged in
+    if (localStorage.getItem('jwtToken')) {
+      resetIdleTimer();
+    }
+  })
+);
+
+// Start the timer after successful login
+function onLoginSuccess(user) {
+  hideSection('login');
+  hideSection('register');
+  showProfile(user || JSON.parse(localStorage.getItem('user')));
+  enableApp();
+  openSidebar();
+  showBalances();
+// Check if user has selected currencies
+  const selected = getSelectedCurrencies();
+  if (!selected || selected.length === 0) {
+    // Show currency picker modal
+    document.getElementById('currencyPickerModal').style.display = 'flex';
+  } else {
+    let lastSection = localStorage.getItem('lastSection') || 'balances';
+    if (lastSection === 'login' || lastSection === 'register') {
+      lastSection = 'balances';
+      localStorage.setItem('lastSection', lastSection);
+    }
+    showSection(lastSection);
+    resetIdleTimer();
+  }
+}
+
+// Clear the timer on logout
+function logout() {
+  clearTimeout(idleTimeout); // Clear idle timer if running
+  localStorage.removeItem('user');
+  localStorage.removeItem('jwtToken'); // Also remove token for security
+  hideProfile();
+  disableApp();
+  showSection('login');
+}
+  </script>
+  <script src="js/menu.js"></script>
+  <script>
+// Sidebar logic
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const menuLinks = sidebar.querySelectorAll('.menu-link');
+  const container = document.querySelector('.container'); // Now this will not be null
+
+      function openSidebar() {
+    sidebar.classList.add('show');
+    sidebarBackdrop.style.display = 'block';
+    container.style.marginLeft = '220px';
+    document.body.style.overflow = 'hidden';
+    sidebarToggle.style.display = 'none';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('show');
+    sidebarBackdrop.style.display = 'none';
+    container.style.marginLeft = '48px';
+    document.body.style.overflow = '';
+    sidebarToggle.style.display = '';
+  }
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Transfer dropdown sync logic (unchanged)
+  const fromSelect = document.getElementById('transferFrom');
+  const toSelect = document.getElementById('transferTo');
+  function syncTransferDropdowns() {
+    if (fromSelect.value === 'money_on_hand') {
+      toSelect.value = 'savings';
+    } else {
+      toSelect.value = 'money_on_hand';
+    }
+  }
+  fromSelect && fromSelect.addEventListener('change', syncTransferDropdowns);
+  toSelect && toSelect.addEventListener('change', function() {
+    if (toSelect.value === 'money_on_hand') {
+      fromSelect.value = 'savings';
+    } else {
+      fromSelect.value = 'money_on_hand';
+    }
+  });
+  syncTransferDropdowns();
+
+  
+  function hideAllSections() {
+    document.querySelectorAll('.container section').forEach(sec => sec.style.display = 'none');
+  }
+
+
+  sidebarToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    openSidebar();
+  });
+
+  sidebarBackdrop.addEventListener('click', closeSidebar);
+
+  menuLinks.forEach(link => {
+    link.addEventListener('click', function() {
+      closeSidebar();
+    });
+  });
+
+  document.addEventListener('click', function(e) {
+    if (
+      sidebar.classList.contains('show') &&
+      !sidebar.contains(e.target) &&
+      e.target !== sidebarToggle
+    ) {
+      closeSidebar();
+    }
+  });
+
+  // Always start collapsed
+  closeSidebar();
+});
+</script>
+
+</body>
+</html>

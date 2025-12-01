@@ -1,0 +1,28 @@
+{
+  "development": {
+    "username": "codespace",
+    "password": "codespace",
+    "database": "personal_finance_db",
+    "host": "db",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "codespace",
+    "password": "codespace",
+    "database": "personal_finance_test",
+    "host": "db",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  }
+}

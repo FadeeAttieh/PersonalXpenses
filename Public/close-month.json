@@ -1,0 +1,7 @@
+{
+    "month": "2025-07",
+    "balances": [
+      { "currency": "USD", "moneyOnHand": 100, "savings": 50, "balance": 150 },
+      { "currency": "LBP", "moneyOnHand": 80, "savings": 20, "balance": 100 }
+    ]
+  }
