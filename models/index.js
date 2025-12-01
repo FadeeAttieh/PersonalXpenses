@@ -13,11 +13,27 @@ let sequelize;
 // Log environment for debugging
 console.log('Environment:', env);
 console.log('DATABASE_URL exists?', !!process.env.DATABASE_URL);
+console.log('DATABASE_PRIVATE_URL exists?', !!process.env.DATABASE_PRIVATE_URL);
 console.log('PGHOST exists?', !!process.env.PGHOST);
 
-// Priority 1: Check for Railway's individual PG variables (most reliable)
-if (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE) {
+// Priority 1: Use Railway's private network URL (FREE, no egress fees)
+if (process.env.DATABASE_PRIVATE_URL) {
+  console.log('Using DATABASE_PRIVATE_URL (Railway private network - no egress fees)');
+  sequelize = new Sequelize(process.env.DATABASE_PRIVATE_URL, {
+    dialect: 'postgres',
+    logging: console.log,
+    dialectOptions: {
+      // Private network doesn't need SSL
+      ssl: false
+    }
+  });
+}
+// Priority 2: Check for Railway's individual PG variables with private domain
+else if (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE) {
   console.log('Using Railway PG variables');
+  const usePrivate = process.env.PGHOST.includes('railway.internal');
+  console.log('Using private network?', usePrivate);
+  
   sequelize = new Sequelize(
     process.env.PGDATABASE,
     process.env.PGUSER,
@@ -27,7 +43,7 @@ if (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && proces
       port: process.env.PGPORT || 5432,
       dialect: 'postgres',
       logging: console.log,
-      dialectOptions: {
+      dialectOptions: usePrivate ? {} : {
         ssl: {
           require: true,
           rejectUnauthorized: false
@@ -36,9 +52,9 @@ if (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && proces
     }
   );
 }
-// Priority 2: Check if DATABASE_URL is provided (Railway, Heroku, etc.)
+// Priority 3: Check if DATABASE_URL is provided (Railway public, Heroku, etc.)
 else if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
-  console.log('Using DATABASE_URL connection');
+  console.log('Using DATABASE_URL connection (public - may incur egress fees)');
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     logging: console.log,
