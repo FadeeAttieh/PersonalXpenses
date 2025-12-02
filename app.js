@@ -27,9 +27,14 @@ app.use(cookieParser());
 
 // Session setup (for demonstration, use a secure store in production)
 app.use(session({
-  secret: 'your-secret-key',
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: true,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
 // Serve static files (CSS, images, etc.) - NO CSRF protection here
