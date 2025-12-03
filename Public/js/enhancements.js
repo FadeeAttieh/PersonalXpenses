@@ -39,14 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeStatePersistence();
   loadDashboardData();
   
-  // Show onboarding tour for first-time users
-  if (!AppState.tourCompleted) {
-    setTimeout(() => {
-      if (confirm('Would you like a quick tour of the new features?')) {
-        startOnboardingTour();
-      }
-    }, 2000);
-  }
+  // Note: Onboarding tour is now triggered after successful login in index.html
   
   // Show dashboard by default
   if (localStorage.getItem('lastSection')) {
@@ -245,18 +238,27 @@ function toggleMiniMode() {
 }
 
 // ========== Session Timer ==========
+let sessionTimerInterval = null; // Store interval ID
+
 function initializeSessionTimer() {
   const timerElement = document.getElementById('sessionTimeRemaining');
   if (!timerElement) return;
   
   document.getElementById('sessionTimer').style.display = 'flex';
   
-  setInterval(() => {
+  // Clear existing interval if any
+  if (sessionTimerInterval) {
+    clearInterval(sessionTimerInterval);
+  }
+  
+  sessionTimerInterval = setInterval(() => {
     const elapsed = Date.now() - AppState.sessionStart;
     const remaining = AppState.sessionDuration - elapsed;
     
     if (remaining <= 0) {
       // Session expired
+      clearInterval(sessionTimerInterval);
+      sessionTimerInterval = null;
       alert('Your session has expired. Please login again.');
       logout();
       return;
@@ -274,6 +276,18 @@ function initializeSessionTimer() {
   }, 1000);
   
   console.log('✓ Session timer initialized');
+}
+
+// Function to stop session timer
+function stopSessionTimer() {
+  if (sessionTimerInterval) {
+    clearInterval(sessionTimerInterval);
+    sessionTimerInterval = null;
+    const timerElement = document.getElementById('sessionTimer');
+    if (timerElement) {
+      timerElement.style.display = 'none';
+    }
+  }
 }
 
 // ========== Notifications ==========
@@ -744,6 +758,7 @@ function displayCurrencyStats(elementId, currencyData) {
     const item = document.createElement('p');
     item.className = 'stat-value privacy-text';
     item.textContent = formatted;
+    item.title = `Variable: currencyData['${currency}']\nValue: ${amount}\nSource: API /api/dashboard/stats`;
     container.appendChild(item);
   });
   

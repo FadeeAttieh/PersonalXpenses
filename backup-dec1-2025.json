@@ -1,0 +1,504 @@
+{
+  "version": "1.0",
+  "exportDate": "2025-12-01T00:00:00.000Z",
+  "userId": 1,
+  "data": {
+    "entries": [
+      {
+        "id": 14,
+        "amount": 1000,
+        "currency": "USD",
+        "date": "2025-12-01T11:17:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:17:26.245Z",
+        "updatedAt": "2025-12-01T11:17:26.245Z"
+      },
+      {
+        "id": 15,
+        "amount": 1000,
+        "currency": "USD",
+        "date": "2025-12-01T11:17:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:17:38.869Z",
+        "updatedAt": "2025-12-01T11:17:38.869Z"
+      },
+      {
+        "id": 16,
+        "amount": 1000,
+        "currency": "USD",
+        "date": "2025-12-01T11:17:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:17:53.271Z",
+        "updatedAt": "2025-12-01T11:17:53.271Z"
+      },
+      {
+        "id": 17,
+        "amount": 1000,
+        "currency": "USD",
+        "date": "2025-12-01T11:18:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:18:32.453Z",
+        "updatedAt": "2025-12-01T11:18:32.453Z"
+      },
+      {
+        "id": 18,
+        "amount": 1000,
+        "currency": "USD",
+        "date": "2025-12-01T11:18:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:18:47.031Z",
+        "updatedAt": "2025-12-01T11:18:47.031Z"
+      },
+      {
+        "id": 19,
+        "amount": 2300,
+        "currency": "USD",
+        "date": "2025-12-01T11:18:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:19:30.884Z",
+        "updatedAt": "2025-12-01T11:19:30.884Z"
+      },
+      {
+        "id": 20,
+        "amount": 850,
+        "currency": "USD",
+        "date": "2025-12-01T11:19:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:20:05.628Z",
+        "updatedAt": "2025-12-01T11:20:05.628Z"
+      },
+      {
+        "id": 21,
+        "amount": 70,
+        "currency": "USD",
+        "date": "2025-12-01T11:20:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:20:25.587Z",
+        "updatedAt": "2025-12-01T11:20:25.587Z"
+      },
+      {
+        "id": 22,
+        "amount": 15,
+        "currency": "USD",
+        "date": "2025-12-01T11:20:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:20:36.735Z",
+        "updatedAt": "2025-12-01T11:20:36.735Z"
+      },
+      {
+        "id": 23,
+        "amount": 34,
+        "currency": "USD",
+        "date": "2025-12-01T11:20:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:21:06.103Z",
+        "updatedAt": "2025-12-01T11:21:06.103Z"
+      },
+      {
+        "id": 24,
+        "amount": 10000000,
+        "currency": "LBP",
+        "date": "2025-12-01T11:20:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:23:04.466Z",
+        "updatedAt": "2025-12-01T11:23:04.466Z"
+      },
+      {
+        "id": 25,
+        "amount": 10000000,
+        "currency": "LBP",
+        "date": "2025-12-01T11:23:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:25:16.989Z",
+        "updatedAt": "2025-12-01T11:25:16.989Z"
+      },
+      {
+        "id": 26,
+        "amount": 9600000,
+        "currency": "LBP",
+        "date": "2025-12-01T11:25:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:27:44.550Z",
+        "updatedAt": "2025-12-01T11:27:44.550Z"
+      },
+      {
+        "id": 58,
+        "amount": 9600000,
+        "currency": "LBP",
+        "date": "2025-12-01T11:31:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:31:29.170Z",
+        "updatedAt": "2025-12-01T11:31:29.170Z"
+      },
+      {
+        "id": 59,
+        "amount": 200000,
+        "currency": "LBP",
+        "date": "2025-12-01T11:31:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:34:53.744Z",
+        "updatedAt": "2025-12-01T11:34:53.744Z"
+      },
+      {
+        "id": 60,
+        "amount": 20000000,
+        "currency": "LBP",
+        "date": "2025-12-01T11:31:00.000Z",
+        "category": "income",
+        "note": "",
+        "userId": 1,
+        "typeId": 28,
+        "locked": false,
+        "createdAt": "2025-12-01T11:35:14.794Z",
+        "updatedAt": "2025-12-01T11:35:14.794Z"
+      },
+      {
+        "id": 61,
+        "amount": 120,
+        "currency": "USD",
+        "date": "2025-12-01T15:15:00.000Z",
+        "category": "income",
+        "note": "from mom",
+        "userId": 1,
+        "typeId": 29,
+        "locked": false,
+        "createdAt": "2025-12-01T15:15:42.506Z",
+        "updatedAt": "2025-12-01T15:15:42.506Z"
+      },
+      {
+        "id": 62,
+        "amount": 670000,
+        "currency": "LBP",
+        "date": "2025-12-01T15:19:00.000Z",
+        "category": "expense",
+        "note": "pharmacy",
+        "userId": 1,
+        "typeId": 30,
+        "locked": false,
+        "createdAt": "2025-12-01T15:19:40.994Z",
+        "updatedAt": "2025-12-01T15:19:40.994Z"
+      },
+      {
+        "id": 66,
+        "amount": 410000,
+        "currency": "LBP",
+        "date": "2025-12-01T14:46:00.000Z",
+        "category": "expense",
+        "note": "Davidoff-cedars",
+        "userId": 1,
+        "typeId": 12,
+        "locked": false,
+        "createdAt": "2025-12-01T14:47:06.066Z",
+        "updatedAt": "2025-12-01T14:47:06.066Z"
+      },
+      {
+        "id": 67,
+        "amount": 30,
+        "currency": "USD",
+        "date": "2025-12-01T14:46:00.000Z",
+        "category": "expense",
+        "note": "",
+        "userId": 1,
+        "typeId": 26,
+        "locked": false,
+        "createdAt": "2025-12-01T14:47:19.264Z",
+        "updatedAt": "2025-12-01T14:47:19.264Z"
+      }
+    ],
+    "balances": [
+      {
+        "id": 44,
+        "userId": 1,
+        "currency": "USD",
+        "amount": "150.00",
+        "initial_amount": "150.00",
+        "month": "2025-12",
+        "createdAt": "2025-12-01T11:14:35.145Z",
+        "updatedAt": "2025-12-01T11:14:35.145Z"
+      },
+      {
+        "id": 45,
+        "userId": 1,
+        "currency": "LBP",
+        "amount": "2100000.00",
+        "initial_amount": "2100000.00",
+        "month": "2025-12",
+        "createdAt": "2025-12-01T11:15:11.150Z",
+        "updatedAt": "2025-12-01T11:15:11.150Z"
+      }
+    ],
+    "savings": [],
+    "transfers": [],
+    "closedMonths": [],
+    "audits": [],
+    "userCurrencies": [
+      {
+        "id": 7,
+        "userId": 1,
+        "currencyCode": "USD",
+        "active": true,
+        "createdAt": "2025-12-01T10:59:34.080Z",
+        "updatedAt": "2025-12-01T10:59:34.080Z"
+      },
+      {
+        "id": 8,
+        "userId": 1,
+        "currencyCode": "LBP",
+        "active": true,
+        "createdAt": "2025-12-01T10:59:34.081Z",
+        "updatedAt": "2025-12-01T10:59:34.081Z"
+      }
+    ],
+    "types": [
+      {
+        "id": 10,
+        "name": "Salary",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:34.317Z",
+        "updatedAt": "2025-12-01T11:12:34.317Z"
+      },
+      {
+        "id": 11,
+        "name": "Freelance",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:35.743Z",
+        "updatedAt": "2025-12-01T11:12:35.743Z"
+      },
+      {
+        "id": 12,
+        "name": "Supermarket",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:37.111Z",
+        "updatedAt": "2025-12-01T11:12:37.111Z"
+      },
+      {
+        "id": 13,
+        "name": "Rent",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:38.398Z",
+        "updatedAt": "2025-12-01T11:12:38.398Z"
+      },
+      {
+        "id": 14,
+        "name": "Utilities",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:39.849Z",
+        "updatedAt": "2025-12-01T11:12:39.849Z"
+      },
+      {
+        "id": 15,
+        "name": "Profit KB",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:41.242Z",
+        "updatedAt": "2025-12-01T11:12:41.242Z"
+      },
+      {
+        "id": 16,
+        "name": "Profit PW",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:42.590Z",
+        "updatedAt": "2025-12-01T11:12:42.590Z"
+      },
+      {
+        "id": 17,
+        "name": "Profit XX",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:42.706Z",
+        "updatedAt": "2025-12-01T11:12:42.706Z"
+      },
+      {
+        "id": 18,
+        "name": "WRTW",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:42.819Z",
+        "updatedAt": "2025-12-01T11:12:42.819Z"
+      },
+      {
+        "id": 19,
+        "name": "Bank/Online",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.011Z",
+        "updatedAt": "2025-12-01T11:12:44.011Z"
+      },
+      {
+        "id": 20,
+        "name": "Whish In",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.108Z",
+        "updatedAt": "2025-12-01T11:12:44.108Z"
+      },
+      {
+        "id": 21,
+        "name": "Whish Out",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.288Z",
+        "updatedAt": "2025-12-01T11:12:44.288Z"
+      },
+      {
+        "id": 22,
+        "name": "Generator/Internet",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.386Z",
+        "updatedAt": "2025-12-01T11:12:44.386Z"
+      },
+      {
+        "id": 23,
+        "name": "Mobile Bill",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.482Z",
+        "updatedAt": "2025-12-01T11:12:44.482Z"
+      },
+      {
+        "id": 24,
+        "name": "Municipality",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.589Z",
+        "updatedAt": "2025-12-01T11:12:44.589Z"
+      },
+      {
+        "id": 25,
+        "name": "Gmen",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.698Z",
+        "updatedAt": "2025-12-01T11:12:44.698Z"
+      },
+      {
+        "id": 26,
+        "name": "Fuel",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.789Z",
+        "updatedAt": "2025-12-01T11:12:44.789Z"
+      },
+      {
+        "id": 27,
+        "name": "Car",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:12:44.967Z",
+        "updatedAt": "2025-12-01T11:12:44.967Z"
+      },
+      {
+        "id": 28,
+        "name": "Count_in",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T11:17:02.439Z",
+        "updatedAt": "2025-12-01T11:17:02.439Z"
+      },
+      {
+        "id": 29,
+        "name": "MISC",
+        "category": "income",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T15:15:12.327Z",
+        "updatedAt": "2025-12-01T15:15:12.327Z"
+      },
+      {
+        "id": 30,
+        "name": "MISC",
+        "category": "expense",
+        "description": null,
+        "userId": 1,
+        "createdAt": "2025-12-01T15:15:29.781Z",
+        "updatedAt": "2025-12-01T15:15:29.781Z"
+      }
+    ]
+  }
+}

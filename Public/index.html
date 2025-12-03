@@ -813,7 +813,7 @@
       <form id="loginFormModal">
         <input name="username" placeholder="Username" required style="width:100%;padding:0.8em;margin-bottom:1em;border:1px solid #ddd;border-radius:8px;font-size:1em;">
         <input name="pin" type="password" placeholder="PIN" required style="width:100%;padding:0.8em;margin-bottom:1em;border:1px solid #ddd;border-radius:8px;font-size:1em;">
-        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-action="login" data-theme="light" style="margin-bottom:1em;"></div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAACCnWpf6Bemxz8VJ" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-action="login" data-theme="light" style="margin-bottom:1em;"></div>
         <button type="submit" class="button" style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);border:none;padding:1em;font-size:1.1em;color:white;border-radius:8px;cursor:pointer;">Login</button>
       </form>
       <div id="loginResultModal" style="margin-top:1em;"></div>
@@ -1153,7 +1153,12 @@ function hideApp() {
 document.getElementById('loginFormModal').onsubmit = async function(e) {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(this));
-  const turnstileToken = window.turnstileToken || 'bypass';
+  const turnstileToken = window.turnstileToken;
+  
+  if (!turnstileToken) {
+    document.getElementById('loginResultModal').innerHTML = '<span style="color:red;">Please complete the security verification.</span>';
+    return;
+  }
   
   data.turnstileToken = turnstileToken;
   const res = await authFetch('/auth/login', {
@@ -1170,6 +1175,18 @@ document.getElementById('loginFormModal').onsubmit = async function(e) {
     await onLoginSuccess({ username: data.username });
     if (localStorage.getItem('jwtToken')) {
       checkMonthClose();
+    }
+    
+    // Show onboarding tour for first-time users after successful login
+    const tourCompleted = localStorage.getItem('tourCompleted') === 'true';
+    if (!tourCompleted) {
+      setTimeout(() => {
+        if (confirm('Would you like a quick tour of the new features?')) {
+          startOnboardingTour();
+        } else {
+          localStorage.setItem('tourCompleted', 'true');
+        }
+      }, 2000);
     }
   } else if (res.status === 403 && result.error && result.error.includes('Email not verified')) {
     document.getElementById('loginResultModal').innerHTML = `<span style="color:orange;">${result.error}</span>`;
@@ -1811,28 +1828,28 @@ function renderBalanceCards(balances) {
           <div class="balance-card-currency">${b.currency}</div>
         </div>
         <div class="balance-metrics">
-          <div class="balance-metric balance-primary">
+          <div class="balance-metric balance-primary" title="Variable: b.moneyOnHand&#10;Formula: initialBalance + income - expenses + transfersIn - transfersOut">
             <div class="balance-metric-label">💵 Money on Hand</div>
             <div class="balance-metric-value">${moneyOnHand.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="balance-metric">
+          <div class="balance-metric" title="Variable: b.initialBalance&#10;Alias: initial_amount (DB)&#10;Description: Starting balance brought forward from previous month">
             <div class="balance-metric-label">Brought Forward</div>
             <div class="balance-metric-value">${initialBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="balance-metric">
+          <div class="balance-metric" title="Variable: b.closingBalance&#10;Alias: amount (DB)&#10;Description: Ending balance entered during month close">
             <div class="balance-metric-label">Closing Balance</div>
             <div class="balance-metric-value">${closingBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="balance-metric">
+          <div class="balance-metric" title="Variable: b.savings&#10;Description: Total savings amount in this currency">
             <div class="balance-metric-label">🏦 Savings</div>
             <div class="balance-metric-value">${savings.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="balance-metric">
+          <div class="balance-metric" title="Variable: total&#10;Formula: moneyOnHand + savings">
             <div class="balance-metric-label">Total Assets</div>
             <div class="balance-metric-value">${total.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
         </div>
-        <div class="comparison-progress" style="margin-top:1em;">
+        <div class="comparison-progress" style="margin-top:1em;" title="Variable: savingsPercent&#10;Formula: (savings / total) * 100">
           <div style="display:flex;justify-content:space-between;font-size:0.9em;margin-bottom:0.5em;">
             <span>Savings Rate</span>
             <span style="font-weight:bold;">${savingsPercent}%</span>
@@ -1871,7 +1888,7 @@ function renderBalanceDashboard(balances, currencyTotals) {
     const portfolioPercent = totalPortfolio > 0 ? ((total / totalPortfolio) * 100).toFixed(1) : 0;
     
     html += `
-      <div class="balance-chart-bar">
+      <div class="balance-chart-bar" title="Currency: ${b.currency}&#10;Variable: total = ${total}&#10;Formula: moneyOnHand (${moneyOnHand}) + savings (${savings})&#10;Percentage: ${portfolioPercent}%">
         <div class="balance-chart-label">${b.currency}</div>
         <div class="balance-chart-container">
           <div class="balance-chart-fill" style="width:${percentage}%">
@@ -1901,14 +1918,14 @@ function renderBalanceDashboard(balances, currencyTotals) {
     html += `
       <div style="margin-bottom:1.5em;">
         <div style="font-weight:bold;margin-bottom:0.8em;color:#667eea;">${b.currency}</div>
-        <div class="balance-chart-bar" style="margin-bottom:0.5em;">
+        <div class="balance-chart-bar" style="margin-bottom:0.5em;" title="Variable: b.moneyOnHand = ${moneyOnHand}&#10;Formula: initialBalance + income - expenses + transfersIn - transfersOut">
           <div style="min-width:120px;color:#555;">💵 Money on Hand</div>
           <div class="balance-chart-container">
             <div class="balance-chart-fill" style="width:${moneyPercent}%;background:linear-gradient(90deg,#667eea,#764ba2)"></div>
           </div>
           <div class="balance-chart-value">${moneyOnHand.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
         </div>
-        <div class="balance-chart-bar">
+        <div class="balance-chart-bar" title="Variable: b.savings = ${savings}">
           <div style="min-width:120px;color:#555;">🏦 Savings</div>
           <div class="balance-chart-container">
             <div class="balance-chart-fill" style="width:${savingsPercent}%;background:linear-gradient(90deg,#43e97b,#38f9d7)"></div>
@@ -1947,35 +1964,35 @@ function renderBalanceComparison(balances) {
           <div class="comparison-title">${b.currency}</div>
         </div>
         <div class="comparison-stats">
-          <div class="comparison-stat">
+          <div class="comparison-stat" title="Variable: b.initialBalance&#10;Alias: initial_amount (DB)">
             <div class="comparison-stat-label">Brought Forward</div>
             <div class="comparison-stat-value">${initialBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="comparison-stat">
+          <div class="comparison-stat" title="Variable: b.closingBalance&#10;Alias: amount (DB)">
             <div class="comparison-stat-label">Closing Balance</div>
             <div class="comparison-stat-value">${closingBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="comparison-stat">
+          <div class="comparison-stat" title="Variable: b.moneyOnHand&#10;Formula: initialBalance + income - expenses + transfersIn - transfersOut">
             <div class="comparison-stat-label">💵 Money on Hand</div>
             <div class="comparison-stat-value" style="color:#667eea;">${moneyOnHand.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="comparison-progress">
+          <div class="comparison-progress" title="Variable: moneyPercent&#10;Formula: (moneyOnHand / total) * 100">
             <div style="font-size:0.85em;color:#999;margin-bottom:0.3em;">${moneyPercent}% of total</div>
             <div class="progress-bar">
               <div class="progress-fill" style="width:${moneyPercent}%"></div>
             </div>
           </div>
-          <div class="comparison-stat">
+          <div class="comparison-stat" title="Variable: b.savings">
             <div class="comparison-stat-label">🏦 Savings</div>
             <div class="comparison-stat-value" style="color:#43e97b;">${savings.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="comparison-progress">
+          <div class="comparison-progress" title="Variable: savingsPercent&#10;Formula: (savings / total) * 100">
             <div style="font-size:0.85em;color:#999;margin-bottom:0.3em;">${savingsPercent}% of total</div>
             <div class="progress-bar">
               <div class="progress-fill" style="width:${savingsPercent}%;background:linear-gradient(90deg,#43e97b,#38f9d7)"></div>
             </div>
           </div>
-          <div class="comparison-stat" style="background:#f9f9f9;margin-top:0.5em;padding:0.8em;border-radius:8px;">
+          <div class="comparison-stat" style="background:#f9f9f9;margin-top:0.5em;padding:0.8em;border-radius:8px;" title="Variable: total&#10;Formula: moneyOnHand + savings">
             <div class="comparison-stat-label" style="font-weight:bold;">Total Assets</div>
             <div class="comparison-stat-value" style="font-size:1.2em;color:#667eea;">${total.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
@@ -1995,12 +2012,12 @@ function renderBalanceTable(balances) {
         <thead>
           <tr>
             <th>Currency</th>
-            <th>Brought Forward</th>
-            <th>Closing Balance</th>
-            <th>Money on Hand</th>
-            <th>Savings</th>
-            <th>Total Assets</th>
-            <th>Savings Rate</th>
+            <th title="Variable: initialBalance&#10;Alias: initial_amount (DB)">Brought Forward</th>
+            <th title="Variable: closingBalance&#10;Alias: amount (DB)">Closing Balance</th>
+            <th title="Variable: moneyOnHand&#10;Formula: initialBalance + income - expenses + transfersIn - transfersOut">Money on Hand</th>
+            <th title="Variable: savings">Savings</th>
+            <th title="Variable: total&#10;Formula: moneyOnHand + savings">Total Assets</th>
+            <th title="Variable: savingsPercent&#10;Formula: (savings / total) * 100">Savings Rate</th>
           </tr>
         </thead>
         <tbody>
@@ -2020,12 +2037,12 @@ function renderBalanceTable(balances) {
           <span class="balance-table-icon">💳</span>
           <span class="balance-table-currency">${b.currency}</span>
         </td>
-        <td>${initialBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-        <td>${closingBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-        <td style="color:#667eea;font-weight:600;">${moneyOnHand.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-        <td style="color:#43e97b;font-weight:600;">${savings.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-        <td style="font-weight:bold;">${total.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-        <td>
+        <td title="Variable: b.initialBalance = ${initialBalance}">${initialBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+        <td title="Variable: b.closingBalance = ${closingBalance}">${closingBalance.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+        <td style="color:#667eea;font-weight:600;" title="Variable: b.moneyOnHand = ${moneyOnHand}&#10;Formula: initialBalance + income - expenses + transfersIn - transfersOut">${moneyOnHand.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+        <td style="color:#43e97b;font-weight:600;" title="Variable: b.savings = ${savings}">${savings.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+        <td style="font-weight:bold;" title="Variable: total = ${total}&#10;Formula: ${moneyOnHand} + ${savings}">${total.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+        <td title="Variable: savingsPercent = ${savingsPercent}&#10;Formula: (${savings} / ${total}) * 100">
           <div style="display:flex;align-items:center;gap:0.5em;">
             <div class="progress-bar" style="flex:1;min-width:60px;">
               <div class="progress-fill" style="width:${savingsPercent}%"></div>
@@ -2048,10 +2065,10 @@ function renderBalanceTable(balances) {
           <tr style="background:#f5f5f5;font-weight:bold;">
             <td>TOTAL</td>
             <td colspan="2"></td>
-            <td style="color:#667eea;">${totalMoneyOnHand.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-            <td style="color:#43e97b;">${totalSavings.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-            <td style="font-size:1.1em;color:#333;">${grandTotal.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-            <td>${avgSavingsRate}%</td>
+            <td style="color:#667eea;" title="Variable: totalMoneyOnHand = ${totalMoneyOnHand}&#10;Formula: SUM of all moneyOnHand">${totalMoneyOnHand.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+            <td style="color:#43e97b;" title="Variable: totalSavings = ${totalSavings}&#10;Formula: SUM of all savings">${totalSavings.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+            <td style="font-size:1.1em;color:#333;" title="Variable: grandTotal = ${grandTotal}&#10;Formula: ${totalMoneyOnHand} + ${totalSavings}">${grandTotal.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+            <td title="Variable: avgSavingsRate = ${avgSavingsRate}&#10;Formula: (${totalSavings} / ${grandTotal}) * 100">${avgSavingsRate}%</td>
           </tr>
         </tfoot>
       </table>
@@ -2177,8 +2194,9 @@ function showSection(id) {
     };
     
     window.onTurnstileError = function() {
-      console.warn('Turnstile failed, allowing login anyway');
-      window.turnstileToken = 'bypass';
+      console.error('Turnstile verification failed');
+      window.turnstileToken = null;
+      alert('Security verification failed. Please refresh the page and try again.');
     };
     
     // Show profile after login
@@ -2617,6 +2635,11 @@ async function restoreDatabase(file) {
 }
 
 async function checkMonthClose() {
+  // DISABLED FOR TESTING - Remove this return to re-enable month closing checks
+  unlockAllSections();
+  hideCloseMonthModal();
+  return;
+  
   const closed = await isPreviousMonthClosedBackend();
   if (closed) {
     unlockAllSections();
@@ -2889,7 +2912,7 @@ function renderIncomeCards() {
   let html = '<div class="currency-cards">';
   Object.keys(window.incomeDataGroups).forEach(currency => {
     const records = window.incomeDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const avg = total / records.length;
     const expanded = window.incomeCardState && window.incomeCardState[currency];
     
@@ -2903,11 +2926,11 @@ function renderIncomeCards() {
           </div>
         </div>
         <div class="currency-card-stats">
-          <div class="stat-item">
+          <div class="stat-item" title="Variable: total (${currency})&#10;Formula: SUM of all income amounts&#10;Value: ${total}">
             <div class="stat-label">Total</div>
             <div class="stat-value">${total.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="stat-item">
+          <div class="stat-item" title="Variable: avg (${currency})&#10;Formula: total / count&#10;Value: ${total} / ${records.length} = ${avg}">
             <div class="stat-label">Average</div>
             <div class="stat-value">${avg.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
@@ -2957,21 +2980,21 @@ function renderIncomeTabs() {
   
   currencies.forEach(currency => {
     const records = window.incomeDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const avg = total / records.length;
     
     html += `
       <div class="currency-tab-content ${activeTab === currency ? 'active' : ''}">
         <div class="currency-summary">
-          <div class="summary-stat">
+          <div class="summary-stat" title="Variable: total (${currency})&#10;Formula: SUM of all income amounts&#10;Value: ${total}">
             <div class="summary-label">Total Income</div>
             <div class="summary-value">${total.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="summary-stat">
+          <div class="summary-stat" title="Variable: records.length&#10;Value: ${records.length}">
             <div class="summary-label">Records</div>
             <div class="summary-value">${records.length}</div>
           </div>
-          <div class="summary-stat">
+          <div class="summary-stat" title="Variable: avg (${currency})&#10;Formula: total / count&#10;Value: ${total} / ${records.length} = ${avg}">
             <div class="summary-label">Average</div>
             <div class="summary-value">${avg.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
@@ -3015,7 +3038,7 @@ function renderIncomeColumns() {
   let html = '<div class="currency-columns">';
   Object.keys(window.incomeDataGroups).forEach(currency => {
     const records = window.incomeDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const expanded = window.incomeColumnState && window.incomeColumnState[currency];
     const displayRecords = expanded ? records : records.slice(0, 5);
     
@@ -3162,7 +3185,7 @@ function renderIncomeDashboard() {
   
   currencies.forEach(currency => {
     const records = window.incomeDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     
     html += `
       <div class="dashboard-card ${activeCurrency === currency ? 'active' : ''}" onclick="selectIncomeDashboardCurrency('${currency}')">
@@ -3181,11 +3204,11 @@ function renderIncomeDashboard() {
         <div class="chart-bars">
   `;
   
-  const maxTotal = Math.max(...currencies.map(c => window.incomeDataGroups[c].reduce((sum, r) => sum + r.amount, 0)));
+  const maxTotal = Math.max(...currencies.map(c => window.incomeDataGroups[c].reduce((sum, r) => sum + Number(r.amount), 0)));
   
   currencies.forEach(currency => {
     const records = window.incomeDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const percentage = (total / maxTotal * 100);
     
     html += `
@@ -3239,7 +3262,7 @@ function renderDataCards(dataGroups, dataType, icon) {
   let html = '<div class="currency-cards">';
   Object.keys(dataGroups).forEach(currency => {
     const records = dataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const avg = total / records.length;
     const expanded = window[stateKey] && window[stateKey][currency];
     
@@ -3253,11 +3276,11 @@ function renderDataCards(dataGroups, dataType, icon) {
           </div>
         </div>
         <div class="currency-card-stats">
-          <div class="stat-item">
+          <div class="stat-item" title="Variable: total (${currency})&#10;Formula: SUM of all ${dataType} amounts&#10;Value: ${total}">
             <div class="stat-label">Total</div>
             <div class="stat-value">${total.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="stat-item">
+          <div class="stat-item" title="Variable: avg (${currency})&#10;Formula: total / count&#10;Value: ${total} / ${records.length} = ${avg}">
             <div class="stat-label">Average</div>
             <div class="stat-value">${avg.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
@@ -3310,7 +3333,7 @@ function renderDataTabs(dataGroups, dataType, icon) {
   
   currencies.forEach(currency => {
     const records = dataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const avg = total / records.length;
     
     html += `
@@ -3370,7 +3393,7 @@ function renderDataColumns(dataGroups, dataType, icon) {
   let html = '<div class="currency-columns">';
   Object.keys(dataGroups).forEach(currency => {
     const records = dataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const expanded = window[stateKey] && window[stateKey][currency];
     const displayRecords = expanded ? records : records.slice(0, 5);
     
@@ -3526,7 +3549,7 @@ function renderDataDashboard(dataGroups, dataType, icon, deleteFn) {
   
   currencies.forEach(currency => {
     const records = dataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     
     html += `
       <div class="dashboard-card ${activeCurrency === currency ? 'active' : ''}" onclick="selectDataDashboardCurrency('${dataType}', '${currency}')">
@@ -3545,11 +3568,11 @@ function renderDataDashboard(dataGroups, dataType, icon, deleteFn) {
         <div class="chart-bars">
   `;
   
-  const maxTotal = Math.max(...currencies.map(c => dataGroups[c].reduce((sum, r) => sum + r.amount, 0)));
+  const maxTotal = Math.max(...currencies.map(c => dataGroups[c].reduce((sum, r) => sum + Number(r.amount), 0)));
   
   currencies.forEach(currency => {
     const records = dataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const percentage = (total / maxTotal * 100);
     
     html += `
@@ -3948,7 +3971,7 @@ function renderTransferCards() {
   let html = '<div class="currency-cards">';
   Object.keys(window.transferDataGroups).forEach(currency => {
     const records = window.transferDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const avg = total / records.length;
     const toSavings = records.filter(r => r.from_account === 'Balance').length;
     const fromSavings = records.filter(r => r.from_account === 'Savings').length;
@@ -3964,15 +3987,15 @@ function renderTransferCards() {
           </div>
         </div>
         <div class="currency-card-stats">
-          <div class="stat-item">
+          <div class="stat-item" title="Variable: total (${currency})&#10;Formula: SUM of all transfer amounts&#10;Value: ${total}">
             <div class="stat-label">Total Moved</div>
             <div class="stat-value">${total.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
           </div>
-          <div class="stat-item">
+          <div class="stat-item" title="Variable: toSavings (${currency})&#10;Formula: COUNT where from_account = 'Balance'&#10;Value: ${toSavings}">
             <div class="stat-label">To Savings</div>
             <div class="stat-value">${toSavings}</div>
           </div>
-          <div class="stat-item">
+          <div class="stat-item" title="Variable: fromSavings (${currency})&#10;Formula: COUNT where from_account = 'Savings'&#10;Value: ${fromSavings}">
             <div class="stat-label">From Savings</div>
             <div class="stat-value">${fromSavings}</div>
           </div>
@@ -4023,7 +4046,7 @@ function renderTransferTabs() {
   
   currencies.forEach(currency => {
     const records = window.transferDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const toSavings = records.filter(r => r.from_account === 'Balance').length;
     const fromSavings = records.filter(r => r.from_account === 'Savings').length;
     
@@ -4083,7 +4106,7 @@ function renderTransferColumns() {
   let html = '<div class="currency-columns">';
   Object.keys(window.transferDataGroups).forEach(currency => {
     const records = window.transferDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const expanded = window.transferColumnState && window.transferColumnState[currency];
     const displayRecords = expanded ? records : records.slice(0, 5);
     
@@ -4230,7 +4253,7 @@ function renderTransferDashboard() {
   
   currencies.forEach(currency => {
     const records = window.transferDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     
     html += `
       <div class="dashboard-card ${activeCurrency === currency ? 'active' : ''}" onclick="selectTransferDashboardCurrency('${currency}')">
@@ -4249,11 +4272,11 @@ function renderTransferDashboard() {
         <div class="chart-bars">
   `;
   
-  const maxTotal = Math.max(...currencies.map(c => window.transferDataGroups[c].reduce((sum, r) => sum + r.amount, 0)));
+  const maxTotal = Math.max(...currencies.map(c => window.transferDataGroups[c].reduce((sum, r) => sum + Number(r.amount), 0)));
   
   currencies.forEach(currency => {
     const records = window.transferDataGroups[currency];
-    const total = records.reduce((sum, r) => sum + r.amount, 0);
+    const total = records.reduce((sum, r) => sum + Number(r.amount), 0);
     const percentage = (total / maxTotal * 100);
     
     html += `
@@ -5801,6 +5824,9 @@ async function saveCurrenciesToBackend(currencies) {
 // Clear the timer on logout
 function logout() {
   clearTimeout(idleTimeout); // Clear idle timer if running
+  if (typeof stopSessionTimer === 'function') {
+    stopSessionTimer(); // Stop session timer
+  }
   localStorage.removeItem('user');
   localStorage.removeItem('jwtToken'); // Also remove token for security
   hideProfile();

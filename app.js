@@ -74,13 +74,32 @@ app.use(errorHandler);
 
 // Sync DB and start server
 const PORT = process.env.PORT || 3000;
-sequelize.sync()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('Sequelize sync error:', err);
-    process.exit(1); // Optional: exit if sync fails
+
+// Run migrations then seed currencies
+const { exec } = require('child_process');
+exec('npx sequelize-cli db:migrate', (error, stdout, stderr) => {
+  if (error) {
+    console.error('Migration error:', error);
+  }
+  console.log('Migration output:', stdout);
+  
+  // Seed currencies after migration
+  exec('npx sequelize-cli db:seed --seed 20250814-currencies.js', (seedError, seedStdout, seedStderr) => {
+    if (seedError) {
+      console.log('Currency seed info:', seedStdout);
+    } else {
+      console.log('Currencies seeded:', seedStdout);
+    }
+    
+    sequelize.sync()
+      .then(() => {
+        app.listen(PORT, '0.0.0.0', () => {
+          console.log(`Server running on port ${PORT}`);
+        });
+      })
+      .catch(err => {
+        console.error('Sequelize sync error:', err);
+        process.exit(1);
+      });
   });
+});

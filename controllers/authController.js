@@ -8,8 +8,12 @@ const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || '';
 
 async function verifyTurnstileToken(token) {
   if (!TURNSTILE_SECRET) {
-    console.warn('TURNSTILE_SECRET_KEY not set, skipping verification');
-    return true; // Skip verification if not configured
+    console.error('TURNSTILE_SECRET_KEY not configured');
+    return false; // Fail if not configured
+  }
+  
+  if (!token) {
+    return false;
   }
   
   try {
