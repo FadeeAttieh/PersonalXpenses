@@ -42,7 +42,8 @@ function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
 }
 
-exports.register = async (req, res, next) {
+// Registration handler with Turnstile verification
+exports.register = async (req, res, next) => {
   try {
     const { username, pin, email, turnstileToken } = req.body;
     
