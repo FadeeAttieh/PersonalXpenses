@@ -42,15 +42,7 @@ function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
 }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-exports.register = async (req, res, next) => {
+exports.register = async (req, res, next) {
   try {
     const { username, pin, email, turnstileToken } = req.body;
     
