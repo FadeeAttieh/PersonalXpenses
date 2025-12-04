@@ -204,6 +204,11 @@
           <span class="new-indicator">✨ <span data-i18n="whats_new">What's New</span></span>
         </a>
       </div>
+      
+      <!-- Developer Credits -->
+      <div style="text-align:center;padding:0.5em;color:#999;font-size:0.75em;border-top:1px solid #eee;margin-top:0.5em;">
+        <span>Developed by <strong style="color:#667eea;">Fadee Attieh</strong></span>
+      </div>
 
       <!-- Help/Tutorial Link -->
       <div class="help-link">
@@ -1272,8 +1277,10 @@ document.getElementById('registerFormModal').onsubmit = async function(e) {
         message += '<small>Please enter this code below to verify your account.</small>';
       } else if (result.message) {
         message += `<br>${result.message}`;
+        message += '<br><small style="color:#666;">📧 Check your email inbox (and spam/junk folder)</small>';
       } else {
         message += '<br>Please check your email for verification code.';
+        message += '<br><small style="color:#666;">📧 Don\'t forget to check your spam/junk folder</small>';
       }
       
       document.getElementById('registerResultModal').innerHTML = message;

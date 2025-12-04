@@ -79,9 +79,22 @@ exports.register = async (req, res, next) => {
       await sgMail.send({
         from: process.env.FROM_EMAIL,
         to: email,
-        subject: 'Verify your account',
-        text: `Your verification code is: ${code}`,
-        html: `<p>Your verification code is: <strong>${code}</strong></p>`
+        subject: 'Verify your account - PersonalXpenses',
+        text: `Your verification code is: ${code}\n\nIf you did not create this account, please disregard this email.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #667eea;">Welcome to PersonalXpenses! 💰</h2>
+            <p>Your verification code is:</p>
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+              <span style="font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 5px;">${code}</span>
+            </div>
+            <p>Enter this code in the app to verify your account.</p>
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+            <p style="font-size: 12px; color: #666;">
+              <strong>Important:</strong> If you did not create this account, please disregard this email.
+            </p>
+          </div>
+        `
       });
       
       console.log(`Verification email sent successfully to ${email}`);
@@ -175,9 +188,22 @@ exports.resendVerification = async (req, res, next) => {
       await sgMail.send({
         from: process.env.FROM_EMAIL,
         to: email,
-        subject: 'Your new verification code',
-        text: `Your new verification code is: ${code}`,
-        html: `<p>Your new verification code is: <strong>${code}</strong></p>`
+        subject: 'Your new verification code - PersonalXpenses',
+        text: `Your new verification code is: ${code}\n\nIf you did not request this code, please disregard this email.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #667eea;">New Verification Code 🔄</h2>
+            <p>Your new verification code is:</p>
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+              <span style="font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 5px;">${code}</span>
+            </div>
+            <p>Enter this code in the app to verify your account.</p>
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+            <p style="font-size: 12px; color: #666;">
+              <strong>Important:</strong> If you did not request this code, please disregard this email.
+            </p>
+          </div>
+        `
       });
       
       console.log(`Verification code resent successfully to ${email}`);
