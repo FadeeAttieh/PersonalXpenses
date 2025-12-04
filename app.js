@@ -53,6 +53,17 @@ app.get('/csrf-token', csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
+// Version endpoint (no auth or CSRF needed)
+const packageJson = require('./package.json');
+app.get('/api/version', (req, res) => {
+  res.json({
+    version: packageJson.version,
+    name: packageJson.name,
+    buildDate: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'production'
+  });
+});
+
 // Auth routes (register/login do not require auth but need CSRF)
 app.use('/auth', csrfProtection, authRoutes);
 

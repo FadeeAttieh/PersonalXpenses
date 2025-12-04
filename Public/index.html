@@ -200,7 +200,7 @@
       <!-- App Version & What's New -->
       <div class="app-version">
         <a href="#" onclick="showWhatsNew(); return false;" class="whats-new-link">
-          <span class="version-badge">v2.0</span>
+          <span class="version-badge" id="appVersionBadge">v2.0.0</span>
           <span class="new-indicator">✨ <span data-i18n="whats_new">What's New</span></span>
         </a>
       </div>
@@ -1369,7 +1369,24 @@ document.getElementById('resendCodeBtnModal').onclick = async function() {
   }
 };
 
+// Fetch and display app version
+async function fetchAppVersion() {
+  try {
+    const res = await fetch('/api/version');
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('appVersionBadge').textContent = `v${data.version}`;
+      console.log(`App version: ${data.version} | Build: ${data.buildDate}`);
+    }
+  } catch (err) {
+    console.log('Could not fetch version');
+  }
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
+  // Fetch app version
+  fetchAppVersion();
+  
   // Fetch CSRF token first
   fetchCsrfToken();
   
