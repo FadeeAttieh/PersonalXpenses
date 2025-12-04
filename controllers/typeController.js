@@ -4,14 +4,40 @@ exports.createType = async (req, res, next) => {
   try {
     const { name, category } = req.body;
     const userId = req.user.id;
-    const type = await Type.create({ name, category, userId });
-    res.status(201).json(type);
+    
+    try {
+      const type = await Type.create({ name, category, userId });
+      res.status(201).json(type);
+    } catch (createErr) {
+      // Check if it's a unique constraint violation on id
+      if (createErr.name === 'SequelizeUniqueConstraintError' || 
+          (createErr.parent && createErr.parent.code === '23505')) {
+        
+        // Get the maximum ID from the table
+        const maxType = await Type.findOne({
+          order: [['id', 'DESC']],
+          attributes: ['id']
+        });
+        
+        const maxId = maxType ? maxType.id : 0;
+        const newId = maxId + 1;
+        
+        // Update the sequence to the correct value
+        await Type.sequelize.query(
+          `SELECT setval(pg_get_serial_sequence('"Types"', 'id'), ${newId}, false);`
+        );
+        
+        // Retry creating the type
+        const type = await Type.create({ name, category, userId });
+        res.status(201).json(type);
+      } else {
+        throw createErr;
+      }
+    }
   } catch (err) {
-  console.error(err);
-  res.status(500).json({ error: err.message || 'Internal server error' });
-}
-    //next(err);
-
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  }
 };
 
 exports.getAllTypes = async (req, res, next) => {

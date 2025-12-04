@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Personal Finance App v2.0</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/enhancements.css">
   <!-- Add Bootstrap Icons CSS -->
@@ -19,11 +19,11 @@
     <div style="text-align:center;color:white;">
       <h1 style="font-size:3em;margin-bottom:0.5em;text-shadow:0 4px 10px rgba(0,0,0,0.3);">💰 Personal Finance</h1>
       <p style="font-size:1.3em;margin-bottom:2em;opacity:0.9;">Track your income, expenses, and savings</p>
-      <div style="display:flex;gap:2em;justify-content:center;">
-        <button onclick="openAuthModal('login')" style="background:white;color:#667eea;border:none;padding:1em 3em;font-size:1.2em;border-radius:50px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <div style="display:flex;gap:1em;justify-content:center;flex-wrap:wrap;padding:0 1em;">
+        <button onclick="openAuthModal('login')" style="background:white;color:#667eea;border:none;padding:1em 2em;font-size:1.1em;border-radius:50px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:transform 0.2s;white-space:nowrap;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
           🔑 Sign In
         </button>
-        <button onclick="openAuthModal('register')" style="background:rgba(255,255,255,0.2);color:white;border:2px solid white;padding:1em 3em;font-size:1.2em;border-radius:50px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        <button onclick="openAuthModal('register')" style="background:rgba(255,255,255,0.2);color:white;border:2px solid white;padding:1em 2em;font-size:1.1em;border-radius:50px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:transform 0.2s;white-space:nowrap;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
           📝 Sign Up
         </button>
       </div>
@@ -803,17 +803,19 @@
 </div>
 
 <!-- Login Modal -->
-<div id="loginModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
-  <div style="background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:450px;width:90%;position:relative;">
+<div id="loginModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;overflow-y:auto;">
+  <div style="background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:450px;width:90%;position:relative;margin:2em auto;">
     <div style="position:sticky;top:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:1.5em;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
       <h3 style="margin:0;font-size:1.5em;">🔑 Sign In</h3>
       <button onclick="closeAuthModal()" style="background:none;border:none;color:white;font-size:2em;cursor:pointer;line-height:0.8;">&times;</button>
     </div>
     <div style="padding:2em;">
       <form id="loginFormModal">
-        <input name="username" placeholder="Username" required style="width:100%;padding:0.8em;margin-bottom:1em;border:1px solid #ddd;border-radius:8px;font-size:1em;">
-        <input name="pin" type="password" placeholder="PIN" required style="width:100%;padding:0.8em;margin-bottom:1em;border:1px solid #ddd;border-radius:8px;font-size:1em;">
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAACCnWpf6Bemxz8VJ" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-action="login" data-theme="light" style="margin-bottom:1em;"></div>
+        <input name="username" placeholder="Username" required style="width:100%;padding:0.8em;margin-bottom:1em;border:1px solid #ddd;border-radius:8px;font-size:1em;box-sizing:border-box;">
+        <input name="pin" type="password" placeholder="PIN" required style="width:100%;padding:0.8em;margin-bottom:1em;border:1px solid #ddd;border-radius:8px;font-size:1em;box-sizing:border-box;">
+        <div style="margin-bottom:1em;width:100%;overflow:hidden;">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAACCnWpf6Bemxz8VJ" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-action="login" data-theme="light" data-size="normal" style="max-width:100%;"></div>
+        </div>
         <button type="submit" class="button" style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);border:none;padding:1em;font-size:1.1em;color:white;border-radius:8px;cursor:pointer;">Login</button>
       </form>
       <div id="loginResultModal" style="margin-top:1em;"></div>
@@ -822,8 +824,8 @@
 </div>
 
 <!-- Register Modal -->
-<div id="registerModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
-  <div style="background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:600px;width:90%;position:relative;">
+<div id="registerModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;overflow-y:auto;">
+  <div style="background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:600px;width:90%;position:relative;margin:2em auto;">
     <div style="position:sticky;top:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:1.5em;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
       <h3 style="margin:0;font-size:1.5em;">📝 Sign Up</h3>
       <button onclick="closeAuthModal()" style="background:none;border:none;color:white;font-size:2em;cursor:pointer;line-height:0.8;">&times;</button>
@@ -898,7 +900,7 @@ async function fetchCsrfToken() {
   }
 }
 
-  function authFetch(url, options = {}) {
+  async function authFetch(url, options = {}) {
   const token = localStorage.getItem('jwtToken');
   options.headers = options.headers || {};
   options.headers['Authorization'] = `Bearer ${token}`;
@@ -907,7 +909,20 @@ async function fetchCsrfToken() {
   if (csrfToken && (options.method === 'POST' || options.method === 'PUT' || options.method === 'DELETE')) {
     options.headers['X-CSRF-Token'] = csrfToken;
   }
-  return fetch(url, options);
+  
+  const response = await fetch(url, options);
+  
+  // Only check for token expiration if user was logged in and it's not the initial load check
+  if (response.status === 401 && token && options.showExpiredAlert !== false) {
+    const data = await response.json();
+    if (data.error && data.error.includes('Invalid token')) {
+      alert('Your session has expired. Please log in again.');
+      logout();
+      return response;
+    }
+  }
+  
+  return response;
 }
 
 // Helper to get cookie value by name
@@ -1211,55 +1226,139 @@ document.getElementById('registerFormModal').onsubmit = async function(e) {
   
   delete data.confirmPin; // Remove confirmPin before sending
   
-  const res = await authFetch('/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  const result = await res.json();
-  if (res.ok) {
-    document.getElementById('registerResultModal').innerHTML = '<span style="color:green;">Registration successful! Please check your email for verification code.</span>';
-    document.getElementById('verificationSectionModal').style.display = 'block';
-    document.querySelector('#verifyEmailFormModal [name="email"]').value = data.email;
-    localStorage.setItem('pendingVerificationEmail', data.email);
-  } else {
-    document.getElementById('registerResultModal').innerHTML = `<span style="color:red;">${result.error || 'Registration failed'}</span>`;
+  try {
+    // Ensure CSRF token is available
+    let csrfToken = getCookie('XSRF-TOKEN');
+    if (!csrfToken) {
+      console.log('CSRF token not found, fetching...');
+      await fetchCsrfToken();
+      csrfToken = getCookie('XSRF-TOKEN');
+    }
+    
+    console.log('Submitting registration with CSRF token:', csrfToken ? 'present' : 'missing');
+    
+    // Use fetch directly for registration (no auth token needed)
+    const res = await fetch('/auth/register', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken || ''
+      },
+      body: JSON.stringify(data)
+    });
+    
+    console.log('Registration response status:', res.status);
+    const result = await res.json();
+    console.log('Registration response:', result);
+    
+    if (res.ok) {
+      let message = '<span style="color:green;">Registration successful!</span><br>';
+      
+      // Check if verification code is in response (email not configured)
+      if (result.verificationCode) {
+        message += '<br><strong style="color:orange;">⚠️ Email service not configured</strong><br>';
+        message += `Your verification code is: <strong style="font-size:1.5em;color:#667eea;">${result.verificationCode}</strong><br>`;
+        message += '<small>Please enter this code below to verify your account.</small>';
+      } else if (result.message) {
+        message += `<br>${result.message}`;
+      } else {
+        message += '<br>Please check your email for verification code.';
+      }
+      
+      document.getElementById('registerResultModal').innerHTML = message;
+      document.getElementById('verificationSectionModal').style.display = 'block';
+      document.querySelector('#verifyEmailFormModal [name="email"]').value = data.email;
+      localStorage.setItem('pendingVerificationEmail', data.email);
+    } else {
+      document.getElementById('registerResultModal').innerHTML = `<span style="color:red;">${result.error || 'Registration failed'}</span>`;
+    }
+  } catch (err) {
+    console.error('Registration error:', err);
+    document.getElementById('registerResultModal').innerHTML = `<span style="color:red;">Registration failed: ${err.message}</span>`;
   }
 };
 
 document.getElementById('verifyEmailFormModal').onsubmit = async function(e) {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(this));
-  const res = await authFetch('/auth/verify-email', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  const result = await res.json();
-  if (res.ok) {
-    document.getElementById('verifyResultModal').innerHTML = '<span style="color:green;">Email verified! You can now log in.</span>';
-    localStorage.removeItem('pendingVerificationEmail');
-    setTimeout(() => {
-      closeAuthModal();
-      openAuthModal('login');
-    }, 1500);
-  } else {
-    document.getElementById('verifyResultModal').innerHTML = `<span style="color:red;">${result.error || 'Verification failed'}</span>`;
+  
+  try {
+    // Ensure CSRF token is available
+    let csrfToken = getCookie('XSRF-TOKEN');
+    if (!csrfToken) {
+      console.log('CSRF token not found, fetching...');
+      await fetchCsrfToken();
+      csrfToken = getCookie('XSRF-TOKEN');
+    }
+    
+    const res = await fetch('/auth/verify-email', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken || ''
+      },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await res.json();
+    console.log('Verification response:', result);
+    
+    if (res.ok) {
+      document.getElementById('verifyResultModal').innerHTML = '<span style="color:green;">Email verified! You can now log in.</span>';
+      localStorage.removeItem('pendingVerificationEmail');
+      setTimeout(() => {
+        closeAuthModal();
+        openAuthModal('login');
+      }, 1500);
+    } else {
+      document.getElementById('verifyResultModal').innerHTML = `<span style="color:red;">${result.error || 'Verification failed'}</span>`;
+    }
+  } catch (err) {
+    console.error('Verification error:', err);
+    document.getElementById('verifyResultModal').innerHTML = `<span style="color:red;">Verification failed: ${err.message}</span>`;
   }
 };
 
 document.getElementById('resendCodeBtnModal').onclick = async function() {
   const email = document.querySelector('#verifyEmailFormModal [name="email"]').value;
-  const res = await authFetch('/auth/resend-verification', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email })
-  });
-  const result = await res.json();
-  document.getElementById('resendResultModal').innerText = result.message || result.error || 'Failed to resend code';
+  
+  try {
+    // Ensure CSRF token is available
+    let csrfToken = getCookie('XSRF-TOKEN');
+    if (!csrfToken) {
+      console.log('CSRF token not found, fetching...');
+      await fetchCsrfToken();
+      csrfToken = getCookie('XSRF-TOKEN');
+    }
+    
+    const res = await fetch('/auth/resend-verification', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken || ''
+      },
+      body: JSON.stringify({ email })
+    });
+    
+    const result = await res.json();
+    console.log('Resend verification response:', result);
+    
+    let message = result.message || result.error || 'Failed to resend code';
+    
+    // If verification code is in response (email not configured), show it prominently
+    if (result.verificationCode) {
+      message = `<strong style="color:orange;">⚠️ Email service not configured</strong><br>`;
+      message += `Your new verification code is: <strong style="font-size:1.3em;color:#667eea;">${result.verificationCode}</strong>`;
+    }
+    
+    document.getElementById('resendResultModal').innerHTML = message;
+  } catch (err) {
+    console.error('Resend verification error:', err);
+    document.getElementById('resendResultModal').innerHTML = `<span style="color:red;">Failed to resend: ${err.message}</span>`;
+  }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   // Fetch CSRF token first
   fetchCsrfToken();
   
@@ -1268,7 +1367,17 @@ window.addEventListener('DOMContentLoaded', () => {
   if (token) {
     showApp();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    onLoginSuccess(user);
+    
+    // Try to load user data - if token is expired, this will fail silently
+    try {
+      await onLoginSuccess(user, true); // Pass true for isInitialLoad
+    } catch (err) {
+      // Token is invalid/expired - clear it and show login
+      console.log('Session expired, clearing token');
+      localStorage.removeItem('jwtToken');
+      localStorage.removeItem('user');
+      hideApp();
+    }
   } else {
     hideApp();
   }
@@ -5625,7 +5734,7 @@ function resetIdleTimer() {
 );
 
 // Start the timer after successful login
-async function onLoginSuccess(user) {
+async function onLoginSuccess(user, isInitialLoad = false) {
   hideSection('login');
   hideSection('register');
   showProfile(user || JSON.parse(localStorage.getItem('user')));
@@ -5635,7 +5744,7 @@ async function onLoginSuccess(user) {
   
   // Fetch user's currencies from backend
   try {
-    const res = await authFetch('/user/currencies');
+    const res = await authFetch('/user/currencies', { showExpiredAlert: !isInitialLoad });
     if (res.ok) {
       const data = await res.json();
       const currencies = data.currencies || [];

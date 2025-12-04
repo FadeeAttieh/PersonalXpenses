@@ -1,12 +1,20 @@
-html { font-size: 16px; }
+html { 
+  font-size: 16px;
+  overflow-y: auto;
+  height: 100%;
+}
 
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-attachment: fixed;
+  background-attachment: scroll;
   color: #222;
   margin: 0;
   padding: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 100vh;
+  position: relative;
 }
 .menu {
   background: #222;
@@ -35,6 +43,7 @@ body {
   min-height: 350px;
   position: relative;
   margin-left: 48px;
+  overflow-y: auto;
 }
 .container, .balance-info, .table-responsive {
   overflow-x: auto;
@@ -123,9 +132,11 @@ form {
   width: 100%;
   margin-top: 3em;
   padding-top: 0;
+  padding-bottom: 2em;
   overflow-y: auto;
   overflow-x: hidden;
   height: calc(100vh - 3em);
+  -webkit-overflow-scrolling: touch;
 }
 #sidebar.show {
   width: 220px;
@@ -395,8 +406,16 @@ section {
 /* Responsive: on small screens, sidebar overlays and hamburger stays */
 
 @media (max-width: 700px) {
-  html { font-size: 15px; }
-  body { font-size: 14px; }
+  html { 
+    font-size: 15px;
+    overflow-y: auto !important;
+  }
+  body { 
+    font-size: 14px;
+    overflow-y: auto !important;
+    min-height: 100vh;
+    background-attachment: scroll;
+  }
   
   /* Sidebar - Start with just hamburger visible */
   #sidebar {
@@ -406,6 +425,12 @@ section {
   #sidebar.show {
     width: 80%; /* Expand to show menu */
     max-width: 280px;
+  }
+  
+  #sidebar .sidebar-links {
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 3em;
   }
   
   .menu-link {
@@ -420,6 +445,24 @@ section {
     margin: 0.5em;
     margin-left: 48px; /* Space for hamburger button */
     box-sizing: border-box;
+    overflow-y: auto;
+  }
+  
+  /* Mobile modal fixes */
+  .modal {
+    overflow-y: auto !important;
+  }
+  
+  .modal-content {
+    max-width: 92vw !important;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  /* Turnstile mobile scaling */
+  .cf-turnstile {
+    transform: scale(0.9);
+    transform-origin: left center;
   }
 }
 
@@ -2740,5 +2783,64 @@ body:not(.logged-in) #sidebar #profileMenu {
   .type-table th,
   .type-table td {
     padding: 0.7em 0.5em;
+  }
+}
+
+/* Mobile-specific Turnstile and scrolling fixes */
+@media (max-width: 480px) {
+  /* Force proper scrolling */
+  html, body {
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Turnstile widget container */
+  .cf-turnstile {
+    max-width: 100%;
+    transform: scale(0.85);
+    transform-origin: left center;
+  }
+  
+  /* Login/Register modal adjustments */
+  #loginModal > div,
+  #registerModal > div {
+    max-width: 90vw !important;
+    margin: 1em auto !important;
+  }
+  
+  #loginModal form,
+  #registerModal form {
+    overflow: hidden;
+  }
+  
+  /* Initial screen button adjustments */
+  #initialScreen button {
+    padding: 0.8em 1.5em !important;
+    font-size: 1em !important;
+    white-space: nowrap;
+  }
+  
+  /* Sidebar logout button visibility */
+  #sidebar .sidebar-links {
+    padding-bottom: 4em !important;
+  }
+  
+  .logout-btn {
+    margin-bottom: 2em !important;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .cf-turnstile {
+    transform: scale(0.75);
+    transform-origin: left center;
+  }
+  
+  #initialScreen button {
+    font-size: 0.9em !important;
+    padding: 0.7em 1.2em !important;
   }
 }

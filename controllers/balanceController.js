@@ -28,9 +28,37 @@ exports.setBalance = async (req, res, next) => {
       return res.status(400).json({ error: 'Initial balance already set for this currency.' });
     }
     const month = req.body.month || getCurrentMonthStr();
-    // Set initial_amount = amount for the first month
-    const balance = await Balance.create({ userId, currency, amount, initial_amount: amount, month });
-    res.status(201).json(balance);
+    
+    try {
+      // Set initial_amount = amount for the first month
+      const balance = await Balance.create({ userId, currency, amount, initial_amount: amount, month });
+      res.status(201).json(balance);
+    } catch (createErr) {
+      // Check if it's a unique constraint violation on id
+      if (createErr.name === 'SequelizeUniqueConstraintError' || 
+          (createErr.parent && createErr.parent.code === '23505')) {
+        
+        // Get the maximum ID from the table
+        const maxBalance = await Balance.findOne({
+          order: [['id', 'DESC']],
+          attributes: ['id']
+        });
+        
+        const maxId = maxBalance ? maxBalance.id : 0;
+        const newId = maxId + 1;
+        
+        // Update the sequence to the correct value
+        await Balance.sequelize.query(
+          `SELECT setval(pg_get_serial_sequence('"Balances"', 'id'), ${newId}, false);`
+        );
+        
+        // Retry creating the balance
+        const balance = await Balance.create({ userId, currency, amount, initial_amount: amount, month });
+        res.status(201).json(balance);
+      } else {
+        throw createErr;
+      }
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message || 'Internal server error' });

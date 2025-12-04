@@ -95,6 +95,16 @@ exec('npx sequelize-cli db:migrate', (error, stdout, stderr) => {
       .then(() => {
         app.listen(PORT, '0.0.0.0', () => {
           console.log(`Server running on port ${PORT}`);
+          
+          // Check email configuration
+          if (!process.env.SENDGRID_API_KEY || !process.env.FROM_EMAIL) {
+            console.warn('⚠️  EMAIL CONFIGURATION MISSING');
+            console.warn('   Set SENDGRID_API_KEY and FROM_EMAIL environment variables');
+            console.warn('   Verification codes will be logged to console instead');
+            console.warn('   See EMAIL_SETUP.md for configuration instructions');
+          } else {
+            console.log('✓ Email service configured (SendGrid)');
+          }
         });
       })
       .catch(err => {

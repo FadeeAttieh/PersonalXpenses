@@ -14,14 +14,40 @@ exports.createEntry = async (req, res, next) => {
   try {
     const { amount, currency, date, note, typeId, category } = req.body;
     const userId = req.user.id;
-    const entry = await Entry.create({ userId, amount, currency, date, note, typeId, category });
-    res.status(201).json(entry);
+    
+    try {
+      const entry = await Entry.create({ userId, amount, currency, date, note, typeId, category });
+      res.status(201).json(entry);
+    } catch (createErr) {
+      // Check if it's a unique constraint violation on id
+      if (createErr.name === 'SequelizeUniqueConstraintError' || 
+          (createErr.parent && createErr.parent.code === '23505')) {
+        
+        // Get the maximum ID from the table
+        const maxEntry = await Entry.findOne({
+          order: [['id', 'DESC']],
+          attributes: ['id']
+        });
+        
+        const maxId = maxEntry ? maxEntry.id : 0;
+        const newId = maxId + 1;
+        
+        // Update the sequence to the correct value
+        await Entry.sequelize.query(
+          `SELECT setval(pg_get_serial_sequence('"Entries"', 'id'), ${newId}, false);`
+        );
+        
+        // Retry creating the entry
+        const entry = await Entry.create({ userId, amount, currency, date, note, typeId, category });
+        res.status(201).json(entry);
+      } else {
+        throw createErr;
+      }
+    }
   } catch (err) {
-  console.error(err);
-  res.status(500).json({ error: err.message || 'Internal server error' });
-}
-    //next(err);
-  
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  }
 };
 
 exports.getEntries = async (req, res, next) => {

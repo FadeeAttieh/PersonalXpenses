@@ -233,6 +233,59 @@ body.privacy-mode .privacy-text:hover {
   filter: blur(3px);
 }
 
+/* Blur all amounts and numeric values in privacy mode across all sections */
+body.privacy-mode .balance-metric-value,
+body.privacy-mode .balance-chart-value,
+body.privacy-mode .comparison-stat-value,
+body.privacy-mode .insight-value,
+body.privacy-mode .currency-summary-value,
+body.privacy-mode .currency-card-total,
+body.privacy-mode .summary-value,
+body.privacy-mode .stat-value,
+body.privacy-mode .dashboard-card-total,
+body.privacy-mode .chart-bar-value,
+body.privacy-mode .column-records-total,
+body.privacy-mode .currency-column-total,
+body.privacy-mode td:nth-child(3),
+body.privacy-mode td:nth-child(4),
+body.privacy-mode td:nth-child(5),
+body.privacy-mode td:nth-child(6),
+body.privacy-mode td:nth-child(7),
+body.privacy-mode .record-amount,
+body.privacy-mode div[style*="font-size:1.2em"],
+body.privacy-mode div[style*="font-size:1.3em"],
+body.privacy-mode div[style*="font-size:1.4em"],
+body.privacy-mode strong:has(+ div[style*="font-size"]) + div {
+  filter: blur(6px);
+  user-select: none;
+  transition: filter 0.3s;
+}
+
+body.privacy-mode .balance-metric-value:hover,
+body.privacy-mode .balance-chart-value:hover,
+body.privacy-mode .comparison-stat-value:hover,
+body.privacy-mode .insight-value:hover,
+body.privacy-mode .currency-summary-value:hover,
+body.privacy-mode .currency-card-total:hover,
+body.privacy-mode .summary-value:hover,
+body.privacy-mode .stat-value:hover,
+body.privacy-mode .dashboard-card-total:hover,
+body.privacy-mode .chart-bar-value:hover,
+body.privacy-mode .column-records-total:hover,
+body.privacy-mode .currency-column-total:hover,
+body.privacy-mode td:nth-child(3):hover,
+body.privacy-mode td:nth-child(4):hover,
+body.privacy-mode td:nth-child(5):hover,
+body.privacy-mode td:nth-child(6):hover,
+body.privacy-mode td:nth-child(7):hover,
+body.privacy-mode .record-amount:hover,
+body.privacy-mode div[style*="font-size:1.2em"]:hover,
+body.privacy-mode div[style*="font-size:1.3em"]:hover,
+body.privacy-mode div[style*="font-size:1.4em"]:hover,
+body.privacy-mode strong:has(+ div[style*="font-size"]) + div:hover {
+  filter: blur(3px);
+}
+
 /* ========== Menu Width Toggle ========== */
 .menu-width-toggle {
   width: 100%;

@@ -18,8 +18,35 @@ exports.createTransfer = async (req, res, next) => {
     const fromAccount = normalizeAccount(from_account);
     const toAccount = normalizeAccount(to_account);
 
+    // Helper function to create with retry on ID conflict
+    const createWithRetry = async (Model, data, tableName) => {
+      try {
+        return await Model.create(data);
+      } catch (createErr) {
+        if (createErr.name === 'SequelizeUniqueConstraintError' || 
+            (createErr.parent && createErr.parent.code === '23505')) {
+          
+          const maxRecord = await Model.findOne({
+            order: [['id', 'DESC']],
+            attributes: ['id']
+          });
+          
+          const maxId = maxRecord ? maxRecord.id : 0;
+          const newId = maxId + 1;
+          
+          await Model.sequelize.query(
+            `SELECT setval(pg_get_serial_sequence('"${tableName}"', 'id'), ${newId}, false);`
+          );
+          
+          return await Model.create(data);
+        } else {
+          throw createErr;
+        }
+      }
+    };
+
     // Create transfer record with normalized names
-    const transfer = await Transfer.create({
+    const transfer = await createWithRetry(Transfer, {
       from_account: fromAccount, 
       to_account: toAccount, 
       amount: amt, 
@@ -27,22 +54,22 @@ exports.createTransfer = async (req, res, next) => {
       date, 
       note, 
       userId
-    });
+    }, 'Transfers');
 
     // Update Savings table based on transfer direction
     if (fromAccount === 'Balance' && toAccount === 'Savings') {
       // Transfer TO savings - create positive Savings record
-      await Savings.create({
+      await createWithRetry(Savings, {
         userId,
         currency,
         amount: amt,
         date,
         note: note || 'Transfer to savings'
-      });
+      }, 'Savings');
 
     } else if (fromAccount === 'Savings' && toAccount === 'Balance') {
       // Transfer FROM savings - create negative Savings record
-      await Savings.create({
+      await createWithRetry(Savings, {
         userId,
         currency,
         amount: -amt,

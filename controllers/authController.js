@@ -1,10 +1,15 @@
 const { User } = require('../models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const { Op } = require('sequelize');
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || '';
+
+// Initialize SendGrid
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 async function verifyTurnstileToken(token) {
   if (!TURNSTILE_SECRET) {
@@ -59,15 +64,42 @@ exports.register = async (req, res, next) => {
     });
 
     // Send verification email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Verify your account',
-      text: `Your verification code is: ${code}`
-    });
+    try {
+      if (!process.env.SENDGRID_API_KEY || !process.env.FROM_EMAIL) {
+        console.error('Email configuration missing: SENDGRID_API_KEY or FROM_EMAIL not set');
+        console.log(`Verification code for ${email}: ${code}`);
+        return res.status(201).json({ 
+          id: user.id, 
+          username: user.username, 
+          email,
+          message: 'User created. Email service not configured - verification code logged to console.',
+          verificationCode: code // TEMPORARY: Remove in production
+        });
+      }
 
-    res.status(201).json({ id: user.id, username: user.username, email });
+      await sgMail.send({
+        from: process.env.FROM_EMAIL,
+        to: email,
+        subject: 'Verify your account',
+        text: `Your verification code is: ${code}`,
+        html: `<p>Your verification code is: <strong>${code}</strong></p>`
+      });
+      
+      console.log(`Verification email sent successfully to ${email}`);
+      res.status(201).json({ id: user.id, username: user.username, email });
+    } catch (emailErr) {
+      console.error('Failed to send verification email:', emailErr.message);
+      console.log(`Verification code for ${email}: ${code}`);
+      res.status(201).json({ 
+        id: user.id, 
+        username: user.username, 
+        email,
+        message: 'User created but verification email failed to send. Check server logs for code.',
+        verificationCode: code // TEMPORARY: Remove in production
+      });
+    }
   } catch (err) {
+    console.error('Registration error:', err);
     next(err);
   }
 };
@@ -131,15 +163,36 @@ exports.resendVerification = async (req, res, next) => {
     user.email_verification_code = code;
     await user.save();
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Your new verification code',
-      text: `Your new verification code is: ${code}`
-    });
+    try {
+      if (!process.env.SENDGRID_API_KEY || !process.env.FROM_EMAIL) {
+        console.error('Email configuration missing: SENDGRID_API_KEY or FROM_EMAIL not set');
+        console.log(`New verification code for ${email}: ${code}`);
+        return res.json({ 
+          message: 'Email service not configured - verification code logged to console.',
+          verificationCode: code // TEMPORARY: Remove in production
+        });
+      }
 
-    res.json({ message: 'Verification code resent.' });
+      await sgMail.send({
+        from: process.env.FROM_EMAIL,
+        to: email,
+        subject: 'Your new verification code',
+        text: `Your new verification code is: ${code}`,
+        html: `<p>Your new verification code is: <strong>${code}</strong></p>`
+      });
+      
+      console.log(`Verification code resent successfully to ${email}`);
+      res.json({ message: 'Verification code resent.' });
+    } catch (emailErr) {
+      console.error('Failed to resend verification email:', emailErr.message);
+      console.log(`New verification code for ${email}: ${code}`);
+      res.json({ 
+        message: 'Verification code generated but email failed to send. Check server logs.',
+        verificationCode: code // TEMPORARY: Remove in production
+      });
+    }
   } catch (err) {
+    console.error('Resend verification error:', err);
     next(err);
   }
 };
