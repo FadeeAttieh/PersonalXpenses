@@ -840,6 +840,9 @@
           <input name="pin" type="password" placeholder="PIN" required style="padding:0.8em;border:1px solid #ddd;border-radius:8px;font-size:1em;">
           <input name="confirmPin" type="password" placeholder="Confirm PIN" required style="padding:0.8em;border:1px solid #ddd;border-radius:8px;font-size:1em;">
         </div>
+        <div style="margin-bottom:1em;width:100%;overflow:hidden;">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAACCnWpf6Bemxz8VJ" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-action="register" data-theme="light" data-size="normal" style="max-width:100%;"></div>
+        </div>
         <button type="submit" class="button" style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);border:none;padding:1em;font-size:1.1em;color:white;border-radius:8px;cursor:pointer;">Register</button>
       </form>
       <div id="registerResultModal" style="margin-top:1em;"></div>
@@ -1223,6 +1226,14 @@ document.getElementById('registerFormModal').onsubmit = async function(e) {
     document.getElementById('registerResultModal').innerHTML = '<span style="color:red;">PINs do not match!</span>';
     return;
   }
+  
+  // Get Turnstile token
+  const turnstileToken = document.querySelector('#registerFormModal .cf-turnstile [name="cf-turnstile-response"]')?.value;
+  if (!turnstileToken) {
+    document.getElementById('registerResultModal').innerHTML = '<span style="color:red;">Please complete the verification</span>';
+    return;
+  }
+  data.turnstileToken = turnstileToken;
   
   delete data.confirmPin; // Remove confirmPin before sending
   

@@ -52,7 +52,13 @@ const transporter = nodemailer.createTransport({
 
 exports.register = async (req, res, next) => {
   try {
-    const { username, pin, email } = req.body;
+    const { username, pin, email, turnstileToken } = req.body;
+    
+    // Verify Turnstile token
+    if (!await verifyTurnstileToken(turnstileToken)) {
+      return res.status(400).json({ error: 'Verification failed. Please try again.' });
+    }
+    
     const hashedPin = await bcrypt.hash(pin, 10);
     const code = generateVerificationCode();
     const user = await User.create({
