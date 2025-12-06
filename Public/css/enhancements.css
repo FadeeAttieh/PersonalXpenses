@@ -17,6 +17,8 @@
   border-radius: 0;
   position: relative;
   z-index: 10;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .profile-avatar {
@@ -62,10 +64,12 @@
 
 .profile-stats {
   display: flex;
-  gap: 1em;
+  gap: 0.5em;
   width: 100%;
   justify-content: space-around;
   margin-bottom: 0.8em;
+  padding: 0 0.5em;
+  box-sizing: border-box;
 }
 
 .profile-stat {
@@ -73,12 +77,18 @@
   flex-direction: column;
   align-items: center;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .stat-value {
-  font-size: 1.2em;
+  font-size: 1em;
   font-weight: bold;
   color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .stat-label {

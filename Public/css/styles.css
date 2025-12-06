@@ -139,7 +139,7 @@ form {
   -webkit-overflow-scrolling: touch;
 }
 #sidebar.show {
-  width: 220px;
+  width: 260px;
 }
 #sidebar.show .sidebar-links {
   display: flex;
@@ -1372,11 +1372,12 @@ section {
 }
 
 .stat-value {
-  font-size: 1.3em;
+  font-size: clamp(1em, 3vw, 1.3em);
   font-weight: 700;
   color: #667eea;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   max-width: 100%;
 }
 
