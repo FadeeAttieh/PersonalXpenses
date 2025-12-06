@@ -531,33 +531,67 @@ async function loadRecentEntries() {
   if (!widget) return;
   
   try {
-    // This would fetch from your API
     const token = localStorage.getItem('jwtToken');
     if (!token) {
       widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">Login to see recent entries</p>';
       return;
     }
     
-    // Mock data for now - replace with actual API call
-    const recentEntries = [
-      { type: 'income', icon: '💵', name: 'Salary', amount: '+$3,500', date: '2h ago' },
-      { type: 'expense', icon: '💸', name: 'Groceries', amount: '-$125', date: '1d ago' },
-      { type: 'transfer', icon: '🔄', name: 'To Savings', amount: '$500', date: '2d ago' }
-    ];
+    // Fetch recent entries from API
+    const response = await fetch('/api/entries?limit=5', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
     
-    if (recentEntries.length === 0) {
+    if (!response.ok) {
       widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">No recent activity</p>';
       return;
     }
     
-    widget.innerHTML = recentEntries.map(entry => `
+    const entries = await response.json();
+    
+    if (!entries || entries.length === 0) {
+      widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">No recent activity</p>';
+      return;
+    }
+    
+    // Get category icons
+    const getIcon = (category) => {
+      switch(category) {
+        case 'income': return '💵';
+        case 'expense': return '💸';
+        case 'transfer': return '🔄';
+        default: return '💰';
+      }
+    };
+    
+    // Format date (e.g., "2h ago", "1d ago")
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000); // seconds
+      
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+      return date.toLocaleDateString();
+    };
+    
+    widget.innerHTML = entries.slice(0, 5).map(entry => `
       <div class="recent-entry-item">
-        <span class="recent-entry-icon">${entry.icon}</span>
+        <span class="recent-entry-icon">${getIcon(entry.category)}</span>
         <div class="recent-entry-details">
-          <span class="recent-entry-type">${entry.name}</span>
-          <span class="recent-entry-amount privacy-text">${entry.amount}</span>
+          <span class="recent-entry-type">${entry.typeName || entry.category}</span>
+          <span class="recent-entry-amount privacy-text">${entry.category === 'expense' ? '-' : '+'}${entry.currency}${parseFloat(entry.amount).toFixed(2)}</span>
         </div>
-        <span class="recent-entry-date">${entry.date}</span>
+        <span class="recent-entry-date">${formatDate(entry.date)}</span>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading recent entries:', error);
+    widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">Error loading entries</p>';
+  }
+}
       </div>
     `).join('');
   } catch (error) {
