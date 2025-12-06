@@ -5799,6 +5799,11 @@ async function onLoginSuccess(user, isInitialLoad = false) {
   openSidebar();
   showBalances();
   
+  // Load dashboard data and counters
+  if (typeof loadDashboardData === 'function') {
+    loadDashboardData();
+  }
+  
   // Fetch user's currencies from backend
   try {
     const res = await authFetch('/user/currencies', { showExpiredAlert: !isInitialLoad });
