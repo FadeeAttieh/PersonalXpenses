@@ -5804,6 +5804,11 @@ async function onLoginSuccess(user, isInitialLoad = false) {
     loadDashboardData();
   }
   
+  // Load recent entries
+  if (typeof loadRecentEntries === 'function') {
+    loadRecentEntries();
+  }
+  
   // Fetch user's currencies from backend
   try {
     const res = await authFetch('/user/currencies', { showExpiredAlert: !isInitialLoad });

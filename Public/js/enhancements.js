@@ -532,7 +532,7 @@ async function loadRecentEntries() {
   
   try {
     // This would fetch from your API
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('jwtToken');
     if (!token) {
       widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">Login to see recent entries</p>';
       return;
