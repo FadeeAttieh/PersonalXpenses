@@ -1,19 +1,19 @@
-// Make toggleSidebar available globally
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  if (sidebar.classList.contains('show')) {
-    sidebar.classList.remove('show');
-    sidebarToggle.classList.remove('active');
-    sidebarToggle.setAttribute('aria-label', 'Open menu');
-    sidebarToggle.setAttribute('title', 'Open Menu (Alt+M)');
-  } else {
-    sidebar.classList.add('show');
-    sidebarToggle.classList.add('active');
-    sidebarToggle.setAttribute('aria-label', 'Close menu');
-    sidebarToggle.setAttribute('title', 'Close Menu (Alt+M)');
-  }
-}
+// Make toggleSidebar available globally - DISABLED (using inline script instead)
+// function toggleSidebar() {
+//   const sidebar = document.getElementById('sidebar');
+//   const sidebarToggle = document.getElementById('sidebarToggle');
+//   if (sidebar.classList.contains('show')) {
+//     sidebar.classList.remove('show');
+//     sidebarToggle.classList.remove('active');
+//     sidebarToggle.setAttribute('aria-label', 'Open menu');
+//     sidebarToggle.setAttribute('title', 'Open Menu (Alt+M)');
+//   } else {
+//     sidebar.classList.add('show');
+//     sidebarToggle.classList.add('active');
+//     sidebarToggle.setAttribute('aria-label', 'Close menu');
+//     sidebarToggle.setAttribute('title', 'Close Menu (Alt+M)');
+//   }
+// }
 
 document.addEventListener('DOMContentLoaded', function () {
   const sidebar = document.getElementById('sidebar');
@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   if (sidebarToggle && sidebar) {
-    sidebarToggle.onclick = toggleSidebar;
+    // DISABLED: Don't override the click handler from index.html
+    // sidebarToggle.onclick = toggleSidebar;
     if (sidebarClose) {
       sidebarClose.onclick = hideSidebar;
     }

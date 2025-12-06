@@ -7,8 +7,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/styles.css?v=20251206b">
-  <link rel="stylesheet" href="css/enhancements.css?v=20251206b">
+  <link rel="stylesheet" href="css/styles.css?v=20251206c">
+  <link rel="stylesheet" href="css/enhancements.css?v=20251206c">
   <!-- Add Bootstrap Icons CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 <!-- Add Clusterize.js CDN before your main script -->
@@ -6027,7 +6027,7 @@ function logout() {
   hideApp(); // Show initial screen instead of login section
 }
   </script>
-  <script src="js/menu.js"></script>
+  <script src="js/menu.js?v=20251206c"></script>
   <script>
 // Sidebar logic
 console.log('Sidebar script loaded');
@@ -6040,7 +6040,10 @@ console.log('Elements found:', {sidebar, sidebarToggle, sidebarBackdrop, menuLin
 
   function openSidebar() {
     console.log('Opening sidebar');
+    console.log('Sidebar element:', sidebar);
+    console.log('Sidebar classList before:', sidebar.classList.toString());
     sidebar.classList.add('show');
+    console.log('Sidebar classList after:', sidebar.classList.toString());
     sidebarToggle.classList.add('active');
     // CSS handles: backdrop display, container margin, toggle visibility
     // Only prevent body scroll on mobile
