@@ -427,6 +427,10 @@ section {
     max-width: 280px;
   }
   
+  #sidebar.show .sidebar-links {
+    display: flex; /* Show menu items when sidebar is open */
+  }
+  
   #sidebar .sidebar-links {
     overflow-y: scroll !important;
     -webkit-overflow-scrolling: touch;
@@ -474,6 +478,10 @@ section {
   
   #sidebar.show {
     width: 220px; /* Expand when clicked */
+  }
+  
+  #sidebar.show .sidebar-links {
+    display: flex; /* Show menu items when sidebar is open */
   }
   
   #sidebar.show ~ #sidebarBackdrop {
