@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <title>Personal Finance App v2.2.1</title>
+  <title>Personal Finance App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/enhancements.css">
@@ -294,56 +294,62 @@
 
 <!-- What's New Modal -->
 <div id="whatsNewModal" class="modal" style="display:none;">
-  <div class="modal-content" style="max-width:600px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1em;">
-      <h3>✨ What's New in v2.0</h3>
+  <div class="modal-content" style="max-width:700px;max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1em;position:sticky;top:0;background:white;padding-bottom:1em;z-index:10;">
+      <h3>✨ Release Notes</h3>
       <button onclick="closeWhatsNew()" style="background:none;border:none;font-size:1.5em;cursor:pointer;">✕</button>
     </div>
     <div class="whats-new-content">
-      <div class="feature-highlight">
-        <span class="feature-icon">🏠</span>
-        <div class="feature-info">
-          <h4>Dashboard Overview</h4>
-          <p>Get a complete snapshot of your finances with the new dashboard featuring quick stats, recent activity, and visualizations.</p>
-        </div>
+      
+      <!-- Version 2.2.1 -->
+      <div class="version-section">
+        <h4 style="color:#667eea;margin-bottom:0.5em;">v2.2.1 <span style="color:#999;font-size:0.8em;font-weight:normal;">December 2025</span></h4>
+        <ul style="line-height:1.8;color:#666;">
+          <li>🔧 Fixed menu counters not loading after login</li>
+          <li>🔐 Fixed dashboard API authentication</li>
+          <li>📐 Fixed menu text and profile overflow issues</li>
+          <li>📊 Fixed dashboard numbers wrapping - now uses responsive sizing</li>
+          <li>🔄 Fixed recent entries widget token check</li>
+        </ul>
       </div>
-      <div class="feature-highlight">
-        <span class="feature-icon">🌙</span>
-        <div class="feature-info">
-          <h4>Dark Mode</h4>
-          <p>Reduce eye strain with the new dark mode option available in the menu footer.</p>
-        </div>
+
+      <!-- Version 2.2.0 -->
+      <div class="version-section" style="margin-top:2em;">
+        <h4 style="color:#667eea;margin-bottom:0.5em;">v2.2.0 <span style="color:#999;font-size:0.8em;font-weight:normal;">December 2025</span></h4>
+        <ul style="line-height:1.8;color:#666;">
+          <li>💬 Added live chat support (Tawk.to integration)</li>
+          <li>🏢 Added ATTmoc branding to footer and auth modals</li>
+          <li>🔒 Chat widget hidden until signed in</li>
+        </ul>
       </div>
-      <div class="feature-highlight">
-        <span class="feature-icon">🌐</span>
-        <div class="feature-info">
-          <h4>Multi-Language Support</h4>
-          <p>Now available in English, French, and Arabic with full RTL support for Arabic.</p>
-        </div>
+
+      <!-- Version 2.1.0 -->
+      <div class="version-section" style="margin-top:2em;">
+        <h4 style="color:#667eea;margin-bottom:0.5em;">v2.1.0 <span style="color:#999;font-size:0.8em;font-weight:normal;">December 2025</span></h4>
+        <ul style="line-height:1.8;color:#666;">
+          <li>📧 Spam folder reminder on registration</li>
+          <li>⚠️ Email disclaimer for unintended recipients</li>
+          <li>👨‍💻 Developer credits in footer</li>
+        </ul>
       </div>
-      <div class="feature-highlight">
-        <span class="feature-icon">📊</span>
-        <div class="feature-info">
-          <h4>Enhanced Menu with Groups</h4>
-          <p>Organized menu items into logical groups: Transactions, Management, Analysis, and Settings.</p>
-        </div>
+
+      <!-- Version 2.0.0 -->
+      <div class="version-section" style="margin-top:2em;">
+        <h4 style="color:#667eea;margin-bottom:0.5em;">v2.0.0 <span style="color:#999;font-size:0.8em;font-weight:normal;">Major Release</span></h4>
+        <ul style="line-height:1.8;color:#666;">
+          <li>🏠 Dashboard overview with real-time stats</li>
+          <li>🌙 Dark mode support</li>
+          <li>🌐 Multi-language (English, French, Arabic)</li>
+          <li>📊 Enhanced menu with organized groups</li>
+          <li>👁️ Privacy mode for hiding sensitive data</li>
+          <li>⌨️ Keyboard shortcuts (Alt+0-8)</li>
+          <li>📱 Mobile-optimized bottom navigation</li>
+          <li>🔐 Cloudflare Turnstile bot protection</li>
+        </ul>
       </div>
-      <div class="feature-highlight">
-        <span class="feature-icon">👁️</span>
-        <div class="feature-info">
-          <h4>Privacy Mode</h4>
-          <p>Hide sensitive financial numbers when viewing in public spaces.</p>
-        </div>
-      </div>
-      <div class="feature-highlight">
-        <span class="feature-icon">⌨️</span>
-        <div class="feature-info">
-          <h4>Keyboard Shortcuts</h4>
-          <p>Navigate faster with Alt+0-8 shortcuts for each section and ESC to close menus.</p>
-        </div>
-      </div>
+      
     </div>
-    <div style="margin-top:1.5em;text-align:center;">
+    <div style="margin-top:2em;padding-top:1em;border-top:1px solid #eee;text-align:center;">
       <button onclick="closeWhatsNew()" class="button">Got it!</button>
     </div>
   </div>
