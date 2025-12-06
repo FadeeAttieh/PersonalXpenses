@@ -614,13 +614,6 @@ async function loadRecentEntries() {
     widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">No recent activity</p>';
   }
 }
-      </div>
-    `).join('');
-  } catch (error) {
-    console.error('Error loading recent entries:', error);
-    widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">Error loading entries</p>';
-  }
-}
 
 // ========== Swipe Gestures (Mobile) ==========
 function initializeSwipeGestures() {
