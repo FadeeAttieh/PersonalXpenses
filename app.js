@@ -79,6 +79,7 @@ app.use('/types', csrfProtection, authJwt, typeRoutes);
 app.use('/transfers', csrfProtection, authJwt, transferRoutes);
 app.use('/report', csrfProtection, authJwt, reportRoutes);
 app.use('/api/dashboard', authJwt, dashboardRoutes);
+app.use('/api/entries', authJwt, require('./routes/entries'));
 
 // Error handler (should be last)
 app.use(errorHandler);
