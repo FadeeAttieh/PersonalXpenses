@@ -1218,8 +1218,16 @@ document.getElementById('loginFormModal').onsubmit = async function(e) {
     closeAuthModal();
     showApp();
     
-    // Show Tawk.to chat widget after login
-    if (typeof Tawk_API !== 'undefined' && Tawk_API.showWidget) {
+    // Load Tawk.to chat widget after login
+    if (typeof Tawk_API === 'undefined') {
+      var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+      var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+      s1.async = true;
+      s1.src = 'https://embed.tawk.to/6932679a1fe45f1982d312ef/1jbme9d75';
+      s1.charset = 'UTF-8';
+      s1.setAttribute('crossorigin', '*');
+      s0.parentNode.insertBefore(s1, s0);
+    } else if (Tawk_API.showWidget) {
       Tawk_API.showWidget();
     }
     
@@ -6099,20 +6107,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-// Hide chat widget by default (show only when signed in)
-Tawk_API.onLoad = function(){
-  if (!localStorage.getItem('token')) {
-    Tawk_API.hideWidget();
+// Only load Tawk.to chat widget if user is signed in
+(function() {
+  const token = localStorage.getItem('jwtToken');
+  if (!token) {
+    return; // Don't load chat widget at all if not signed in
   }
-};
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6932679a1fe45f1982d312ef/1jbme9d75';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
+  
+  // User is signed in, load the widget
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/6932679a1fe45f1982d312ef/1jbme9d75';
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
