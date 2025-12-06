@@ -1375,6 +1375,9 @@ section {
   font-size: 1.3em;
   font-weight: 700;
   color: #667eea;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .currency-card-toggle {

@@ -378,6 +378,9 @@ body.privacy-mode strong:has(+ div[style*="font-size"]) + div:hover {
 
 .menu-text {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: 500;
 }
 
