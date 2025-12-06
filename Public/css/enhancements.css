@@ -82,20 +82,26 @@
 }
 
 .stat-value {
-  font-size: 1em;
+  font-size: 0.9em;
   font-weight: bold;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  display: block;
+  max-width: 100%;
 }
 
 .stat-label {
-  font-size: 0.75em;
+  font-size: 0.7em;
   color: rgba(255,255,255,0.7);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .logout-btn {
@@ -810,6 +816,14 @@ input:checked + .slider:before {
   gap: 1.5em;
   transition: all 0.3s;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.stat-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .stat-card:hover {

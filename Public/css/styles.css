@@ -1372,13 +1372,15 @@ section {
 }
 
 .stat-value {
-  font-size: clamp(1em, 3vw, 1.3em);
+  font-size: 1.1em;
   font-weight: 700;
   color: #667eea;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  display: block;
+  line-height: 1.2;
 }
 
 .currency-card-toggle {
