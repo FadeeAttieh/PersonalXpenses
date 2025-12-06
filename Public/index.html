@@ -6027,11 +6027,13 @@ function logout() {
   <script src="js/menu.js"></script>
   <script>
 // Sidebar logic
+console.log('Sidebar script loaded');
   const sidebar = document.getElementById('sidebar');
   const sidebarToggle = document.getElementById('sidebarToggle');
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');
   const menuLinks = sidebar.querySelectorAll('.menu-link');
   const container = document.querySelector('.container'); // Now this will not be null
+console.log('Elements found:', {sidebar, sidebarToggle, sidebarBackdrop, menuLinks: menuLinks.length});
 
   function openSidebar() {
     console.log('Opening sidebar');
@@ -6053,6 +6055,7 @@ function logout() {
   }
 
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOMContentLoaded fired');
   // Transfer dropdown sync logic (unchanged)
   const fromSelect = document.getElementById('transferFrom');
   const toSelect = document.getElementById('transferTo');
