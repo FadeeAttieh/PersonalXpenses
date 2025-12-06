@@ -6033,7 +6033,7 @@ function logout() {
   const menuLinks = sidebar.querySelectorAll('.menu-link');
   const container = document.querySelector('.container'); // Now this will not be null
 
-      function openSidebar() {
+  function openSidebar() {
     sidebar.classList.add('show');
     sidebarToggle.classList.add('active');
     // CSS handles: backdrop display, container margin, toggle visibility
@@ -6042,6 +6042,7 @@ function logout() {
       document.body.style.overflow = 'hidden';
     }
   }
+  
   function closeSidebar() {
     sidebar.classList.remove('show');
     sidebarToggle.classList.remove('active');
@@ -6097,7 +6098,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (
       sidebar.classList.contains('show') &&
       !sidebar.contains(e.target) &&
-      e.target !== sidebarToggle
+      !e.target.closest('#sidebarToggle')
     ) {
       closeSidebar();
     }
