@@ -537,19 +537,33 @@ async function loadRecentEntries() {
       return;
     }
     
-    // Fetch recent entries from API
-    const response = await fetch('/api/entries?limit=5', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    // Fetch recent entries from both income and expense categories
+    const [incomeRes, expenseRes] = await Promise.all([
+      fetch('/api/entries?category=income', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      fetch('/api/entries?category=expense', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+    ]);
     
-    if (!response.ok) {
-      widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">No recent activity</p>';
-      return;
+    let allEntries = [];
+    
+    if (incomeRes.ok) {
+      const income = await incomeRes.json();
+      allEntries = allEntries.concat(income);
     }
     
-    const entries = await response.json();
+    if (expenseRes.ok) {
+      const expenses = await expenseRes.json();
+      allEntries = allEntries.concat(expenses);
+    }
     
-    if (!entries || entries.length === 0) {
+    // Sort by date descending and take top 5
+    allEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const recentEntries = allEntries.slice(0, 5);
+    
+    if (recentEntries.length === 0) {
       widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">No recent activity</p>';
       return;
     }
@@ -577,11 +591,11 @@ async function loadRecentEntries() {
       return date.toLocaleDateString();
     };
     
-    widget.innerHTML = entries.slice(0, 5).map(entry => `
+    widget.innerHTML = recentEntries.map(entry => `
       <div class="recent-entry-item">
         <span class="recent-entry-icon">${getIcon(entry.category)}</span>
         <div class="recent-entry-details">
-          <span class="recent-entry-type">${entry.typeName || entry.category}</span>
+          <span class="recent-entry-type">${entry.Type?.name || entry.category}</span>
           <span class="recent-entry-amount privacy-text">${entry.category === 'expense' ? '-' : '+'}${entry.currency}${parseFloat(entry.amount).toFixed(2)}</span>
         </div>
         <span class="recent-entry-date">${formatDate(entry.date)}</span>
