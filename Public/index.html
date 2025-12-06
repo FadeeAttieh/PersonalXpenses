@@ -826,6 +826,13 @@
         <button type="submit" class="button" style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);border:none;padding:1em;font-size:1.1em;color:white;border-radius:8px;cursor:pointer;">Login</button>
       </form>
       <div id="loginResultModal" style="margin-top:1em;"></div>
+      
+      <!-- Footer Branding -->
+      <div style="text-align:center;padding:1em 0 0;margin-top:1.5em;border-top:1px solid #eee;color:#999;font-size:0.75em;">
+        <span>Developed by <strong style="color:#667eea;">Fadee Attieh</strong></span>
+        <span style="margin:0 0.5em;">|</span>
+        <span>Powered by <strong style="color:#667eea;">ATTmoc</strong></span>
+      </div>
     </div>
   </div>
 </div>
@@ -863,6 +870,13 @@
         <div id="verifyResultModal" style="margin-top:1em;"></div>
         <button type="button" id="resendCodeBtnModal" style="margin-top:1em;background:#f0f0f0;border:1px solid #ddd;padding:0.8em;width:100%;border-radius:8px;cursor:pointer;">Resend Code</button>
         <div id="resendResultModal" style="margin-top:0.5em;"></div>
+      </div>
+      
+      <!-- Footer Branding -->
+      <div style="text-align:center;padding:1em 0 0;margin-top:1.5em;border-top:1px solid #eee;color:#999;font-size:0.75em;">
+        <span>Developed by <strong style="color:#667eea;">Fadee Attieh</strong></span>
+        <span style="margin:0 0.5em;">|</span>
+        <span>Powered by <strong style="color:#667eea;">ATTmoc</strong></span>
       </div>
     </div>
   </div>
@@ -1197,6 +1211,12 @@ document.getElementById('loginFormModal').onsubmit = async function(e) {
     localStorage.setItem('user', JSON.stringify({ username: data.username }));
     closeAuthModal();
     showApp();
+    
+    // Show Tawk.to chat widget after login
+    if (typeof Tawk_API !== 'undefined' && Tawk_API.showWidget) {
+      Tawk_API.showWidget();
+    }
+    
     await onLoginSuccess({ username: data.username });
     if (localStorage.getItem('jwtToken')) {
       checkMonthClose();
@@ -6064,6 +6084,12 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+// Hide chat widget by default (show only when signed in)
+Tawk_API.onLoad = function(){
+  if (!localStorage.getItem('token')) {
+    Tawk_API.hideWidget();
+  }
+};
 (function(){
 var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
 s1.async=true;
