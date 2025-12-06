@@ -6034,6 +6034,7 @@ function logout() {
   const container = document.querySelector('.container'); // Now this will not be null
 
   function openSidebar() {
+    console.log('Opening sidebar');
     sidebar.classList.add('show');
     sidebarToggle.classList.add('active');
     // CSS handles: backdrop display, container margin, toggle visibility
@@ -6044,6 +6045,7 @@ function logout() {
   }
   
   function closeSidebar() {
+    console.log('Closing sidebar');
     sidebar.classList.remove('show');
     sidebarToggle.classList.remove('active');
     // CSS handles: backdrop display, container margin, toggle visibility
@@ -6079,6 +6081,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   sidebarToggle.addEventListener('click', function(e) {
     e.stopPropagation();
+    e.preventDefault();
+    console.log('Toggle clicked, sidebar.show:', sidebar.classList.contains('show'));
     if (sidebar.classList.contains('show')) {
       closeSidebar();
     } else {
