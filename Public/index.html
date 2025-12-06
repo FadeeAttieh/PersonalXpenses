@@ -6035,6 +6035,7 @@ function logout() {
 
       function openSidebar() {
     sidebar.classList.add('show');
+    sidebarToggle.classList.add('active');
     // CSS handles: backdrop display, container margin, toggle visibility
     // Only prevent body scroll on mobile
     if (window.innerWidth <= 700) {
@@ -6043,6 +6044,7 @@ function logout() {
   }
   function closeSidebar() {
     sidebar.classList.remove('show');
+    sidebarToggle.classList.remove('active');
     // CSS handles: backdrop display, container margin, toggle visibility
     document.body.style.overflow = '';
   }
@@ -6076,7 +6078,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   sidebarToggle.addEventListener('click', function(e) {
     e.stopPropagation();
-    openSidebar();
+    if (sidebar.classList.contains('show')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
   });
 
   sidebarBackdrop.addEventListener('click', closeSidebar);
