@@ -550,13 +550,21 @@ async function loadRecentEntries() {
     let allEntries = [];
     
     if (incomeRes.ok) {
-      const income = await incomeRes.json();
-      allEntries = allEntries.concat(income);
+      try {
+        const income = await incomeRes.json();
+        allEntries = allEntries.concat(income);
+      } catch (e) {
+        console.error('Error parsing income response:', e);
+      }
     }
     
     if (expenseRes.ok) {
-      const expenses = await expenseRes.json();
-      allEntries = allEntries.concat(expenses);
+      try {
+        const expenses = await expenseRes.json();
+        allEntries = allEntries.concat(expenses);
+      } catch (e) {
+        console.error('Error parsing expense response:', e);
+      }
     }
     
     // Sort by date descending and take top 5
@@ -603,7 +611,7 @@ async function loadRecentEntries() {
     `).join('');
   } catch (error) {
     console.error('Error loading recent entries:', error);
-    widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">Error loading entries</p>';
+    widget.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.6);padding:1em;font-size:0.85em;">No recent activity</p>';
   }
 }
       </div>
